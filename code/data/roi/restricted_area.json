@@ -1,0 +1,19 @@
+{
+  "restricted_areas": [
+    {
+      "name": "Area 1",
+      "type": "polygon",
+      "points": [[100, 100], [400, 100], [400, 300], [100, 300]],
+      "color": [255, 0, 0]
+    },
+    {
+      "name": "Area 2",
+      "type": "rectangle",
+      "x": 500,
+      "y": 200,
+      "width": 200,
+      "height": 150,
+      "color": [0, 0, 255]
+    }
+  ]
+}
