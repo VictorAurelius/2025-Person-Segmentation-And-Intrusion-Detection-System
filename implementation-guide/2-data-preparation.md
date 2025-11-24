@@ -418,3 +418,50 @@ Tiếp theo: [3. Định Nghĩa ROI](3-roi-definition.md)
 
 **Ngày tạo**: Tháng 1/2025
 **Phiên bản**: 1.0
+
+
+Tiến độ: tôi đã chọn 5 nguồn phù hợp và liệt kê các clip/dataset cụ thể cùng link tải/trang chính thức. Dưới đây là danh sách (Tiếng Việt) — mỗi mục có tiêu đề, lý do phù hợp, link tải hoặc trang tải, và ghi chú về định dạng/annotation/đăng ký.
+
+VIRAT Video Dataset
+
+Lý do: Nhiều video surveillance camera (ground) với cảnh người/xe vào‑ra, hành vi xâm nhập; phù hợp cho detection, tracking, segmentation.
+Link tải / trang chính thức: https://viratdata.org/
+Bộ dữ liệu trên Kitware (truy cập để tải nhiều video mẫu và phiên bản downsampled): https://data.kitware.com/#collection/56f56db28d777f753209ba9f
+Ghi chú: Video HD/AVI/MP4; annotations (activity/object) có trong repo GitLab của VIRAT. Một số phần ground camera release có điều khoản (Protection Agreement) — đọc hướng dẫn trên trang trước khi tải.
+CAVIAR (INRIA / Univ. of Edinburgh)
+
+Lý do: Tập nhiều kịch bản surveillance điển hình (enter/exit, crossing, leaving objects) từ camera cố định; clip ngắn, dễ dùng cho thử nghiệm intrusion ROI.
+Link tải / trang chính thức: http://homepages.inf.ed.ac.uk/rbf/CAVIAR/
+Dữ liệu (folders with clips) ở: http://groups.inf.ed.ac.uk/vision/DATASETS/CAVIAR/CAVIARDATA1/
+Ghi chú: Video định dạng MPEG (.mpg) kích thước nhỏ (~384×288). Ground truth annotation (XML) có sẵn cho nhiều clip; tải trực tiếp từ trang dữ liệu (không cần đăng ký).
+UCSD Anomaly Detection Dataset (Peds1 / Peds2)
+
+Lý do: Camera cố định nhìn xuống tuyến đi bộ; nhiều clip có người đi qua, xen kẽ tình huống bất thường — phù hợp cho thử nghiệm phát hiện xâm nhập/anomaly detection và localization.
+Link tải trực tiếp: http://www.svcl.ucsd.edu/projects/anomaly/UCSD_Anomaly_Dataset.tar.gz
+Ghi chú: Tập tin nén chứa image sequences / AVI; một số ground‑truth masks/annotations có kèm; tải công khai, không cần đăng ký.
+Avenue Dataset (CUHK) — Abnormal Event Detection
+
+Lý do: Camera cố định trên campus, nhiều clip người đi/đổi hướng/đi vào vùng cấm; bao gồm ground‑truth cho event bất thường — phù hợp cho intrusion detection thử nghiệm.
+Link tải / trang chính thức: http://www.cse.cuhk.edu.hk/leojia/projects/detectabnormal/
+Direct zip: http://www.cse.cuhk.edu.hk/leojia/projects/detectabnormal/Avenue_Dataset.zip
+Ground truth demo: http://www.cse.cuhk.edu.hk/leojia/projects/detectabnormal/ground_truth_demo.zip
+Ghi chú: Bao gồm training/testing clips (16/21), ground truth ở dạng rectangle; video/frames ở kích thước trung bình (phù hợp 480p–720p); tải công khai.
+MOTChallenge (MOT16 / MOT17 / MOTS)
+
+Lý do: Bộ sequence nhiều cảnh pedestrian, nhiều tình huống che khuất và crossing, phù hợp để lấy sequence surveillance thực tế với annotation bounding boxes; có hỗ trợ instance segmentation (MOTS) nếu cần segmentation labels.
+Link (trang dữ liệu chính thức): https://motchallenge.net/data/
+Ghi chú: Thường cần đăng ký tài khoản/đăng nhập để tải full dataset; files gồm image sequences (img1/) hoặc video, annotation gt.txt (bounding boxes + IDs). MOTS có masks cho một số sequence.
+Gợi ý tóm tắt để bạn chọn nhanh:
+
+Muốn file nhỏ, dễ thử nghiệm: bắt đầu với CAVIAR (nhỏ, mpg) hoặc Avenue (zip với GT rectangles).
+Muốn dữ liệu benchmark/đa cảnh: MOTChallenge (cần đăng ký).
+Muốn video cảnh thực, nhiều hoạt động xâm nhập: VIRAT (đầy đủ nhưng cần đọc điều khoản).
+Muốn bài test anomaly/pixel masks: UCSD (download tar.gz trực tiếp).
+Muốn tôi làm gì tiếp theo?
+
+Tải 1–3 clip mẫu bạn chọn vào thư mục code/data/ trong workspace (tôi cần bạn xác nhận nguồn nào, và chấp nhận rằng một số nguồn yêu cầu đăng ký/tuân thủ điều khoản).
+Hoặc tôi liệt kê các file cụ thể hơn (tên file + kích thước + định dạng) nếu bạn muốn tự tải.
+Trả lời bằng:
+
+chọn các nguồn muốn tôi tải (ví dụ: Avenue, CAVIAR), và/hoặc
+“liệt kê” nếu bạn chỉ muốn danh sách file cụ thể để tự tải.
