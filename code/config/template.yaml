@@ -1,0 +1,48 @@
+# Video Input Configuration
+video:
+  source: "data/input/test_video.mp4"  # Path to video file or camera index (0, 1, 2...)
+  fps: 30
+
+# Motion Detection Configuration
+motion:
+  method: "MOG2"  # Options: "MOG2", "KNN", "frame_diff"
+  history: 500    # Number of frames for background learning
+  threshold: 16   # Sensitivity threshold (lower = more sensitive)
+  detect_shadows: true  # Detect and mark shadows
+
+# Adaptive Thresholding Configuration
+threshold:
+  method: "gaussian"  # Options: "gaussian", "mean"
+  block_size: 11      # Neighborhood size (must be odd)
+  C: 2                # Constant subtracted from mean
+
+# Edge Detection Configuration
+edge:
+  method: "canny"       # Options: "canny", "sobel"
+  low_threshold: 50     # Canny lower threshold
+  high_threshold: 150   # Canny upper threshold
+
+# Morphological Operations Configuration
+morphology:
+  kernel_size: 5   # Size of structuring element
+  iterations: 2    # Number of times to apply operations
+
+# Intrusion Detection Configuration
+intrusion:
+  roi_file: "data/roi/restricted_area.json"
+  overlap_threshold: 0.3  # Minimum overlap ratio to trigger alert (30%)
+  time_threshold: 1.0     # Seconds object must be in ROI to trigger
+  min_object_area: 1000   # Minimum pixel area to consider as valid object
+
+# Alert System Configuration
+alert:
+  visual: true                           # Show alerts on video
+  audio: true                            # Play sound on alert
+  log_file: "data/output/alerts.log"    # Path to alert log file
+  save_screenshots: true                 # Save frame when alert triggers
+
+# Output Configuration
+output:
+  save_video: true                       # Save processed video
+  output_path: "data/output/result.mp4" # Output video path
+  show_realtime: true                    # Display video during processing
