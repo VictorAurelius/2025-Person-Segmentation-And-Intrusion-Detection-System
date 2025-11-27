@@ -1,96 +1,96 @@
-# Image Processing Cơ Bản
+# Image Processing (Xử Lý Ảnh) Cơ Bản
 
-## 1. Digital Image
+## 1. Digital Image (Ảnh Số)
 
 ### A. Định Nghĩa
 
-Digital image là hàm 2D: `f(x, y)`
+Digital Image (ảnh số) là hàm 2D: `f(x, y)`
 
 Trong đó:
 - `(x, y)`: Tọa độ không gian
-- `f`: Cường độ (intensity) hoặc màu sắc tại điểm đó
+- `f`: Intensity (cường độ sáng) hoặc màu sắc tại điểm đó
 
 ### B. Biểu Diễn
 
 ```python
 import numpy as np
 
-# Grayscale image (H × W)
+# Grayscale image (ảnh xám) - H × W
 gray_image = np.array([
     [0, 50, 100],
     [150, 200, 255]
 ])  # Shape: (2, 3)
 
-# Color image (H × W × 3)
+# Color image (ảnh màu) - H × W × 3
 color_image = np.array([
-    [[255, 0, 0], [0, 255, 0]],    # Row 1: Red, Green
-    [[0, 0, 255], [255, 255, 0]]   # Row 2: Blue, Yellow
-])  # Shape: (2, 2, 3) - BGR format
+    [[255, 0, 0], [0, 255, 0]],    # Hàng 1: Đỏ, Xanh lá
+    [[0, 0, 255], [255, 255, 0]]   # Hàng 2: Xanh dương, Vàng
+])  # Shape: (2, 2, 3) - định dạng BGR
 ```
 
-### C. Pixel Values
+### C. Giá Trị Pixel
 
-**Grayscale:**
+**Grayscale (ảnh xám):**
 ```
-Range: 0 to 255 (8-bit)
-0   = Black (đen)
-127 = Gray (xám)
-255 = White (trắng)
+Khoảng: 0 đến 255 (8-bit)
+0   = Đen
+127 = Xám
+255 = Trắng
 ```
 
-**Color (BGR):**
+**Color (ảnh màu - BGR):**
 ```python
-[255, 0, 0]     # Blue (xanh dương)
-[0, 255, 0]     # Green (xanh lá)
-[0, 0, 255]     # Red (đỏ)
-[255, 255, 255] # White (trắng)
-[0, 0, 0]       # Black (đen)
+[255, 0, 0]     # Xanh dương (Blue)
+[0, 255, 0]     # Xanh lá (Green)
+[0, 0, 255]     # Đỏ (Red)
+[255, 255, 255] # Trắng
+[0, 0, 0]       # Đen
 ```
 
 ---
 
-## 2. Image Properties
+## 2. Thuộc Tính Ảnh
 
-### A. Resolution
+### A. Resolution (Độ Phân Giải)
 
 ```python
-# Load image
+# Đọc ảnh
 image = cv2.imread('image.jpg')
 height, width, channels = image.shape
 
-print(f"Resolution: {width} × {height}")
-print(f"Channels: {channels}")
-print(f"Total pixels: {width * height}")
+print(f"Độ phân giải: {width} × {height}")
+print(f"Kênh màu: {channels}")
+print(f"Tổng số pixels: {width * height}")
 
-# Example output:
-# Resolution: 1920 × 1080
-# Channels: 3
-# Total pixels: 2,073,600
+# Ví dụ kết quả:
+# Độ phân giải: 1920 × 1080
+# Kênh màu: 3
+# Tổng số pixels: 2,073,600
 ```
 
-### B. Color Spaces
+### B. Color Spaces (Không Gian Màu)
 
-#### 1. BGR (OpenCV default)
+#### 1. BGR (Mặc định của OpenCV)
 
 ```python
 bgr_image = cv2.imread('image.jpg')
-# Channels: Blue, Green, Red
+# Các kênh: Blue (xanh dương), Green (xanh lá), Red (đỏ)
 
 b, g, r = cv2.split(bgr_image)
 ```
 
-#### 2. RGB (Standard)
+#### 2. RGB (Chuẩn phổ biến)
 
 ```python
 rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
-# Channels: Red, Green, Blue
+# Các kênh: Red, Green, Blue
 ```
 
-#### 3. Grayscale
+#### 3. Grayscale (Ảnh xám)
 
 ```python
 gray = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
-# Single channel: Intensity only
+# Chỉ 1 kênh: intensity
 ```
 
 #### 4. HSV (Hue, Saturation, Value)
@@ -98,84 +98,84 @@ gray = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
 ```python
 hsv = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2HSV)
 
-# H: Hue (màu sắc) - 0 to 180
-# S: Saturation (độ bão hòa) - 0 to 255
-# V: Value (độ sáng) - 0 to 255
+# H: Hue (màu sắc) - 0 đến 180
+# S: Saturation (độ bão hòa) - 0 đến 255
+# V: Value (độ sáng) - 0 đến 255
 ```
 
-**Use Cases:**
-- BGR/RGB: Display, general processing
-- Grayscale: Edge detection, motion detection
-- HSV: Color-based segmentation
+**Trường hợp sử dụng:**
+- BGR/RGB: Hiển thị, xử lý thông thường
+- Grayscale: Phát hiện cạnh, phát hiện chuyển động
+- HSV: Phân vùng dựa trên màu sắc
 
 ---
 
-## 3. Basic Operations
+## 3. Các Thao Tác Cơ Bản
 
-### A. Reading and Writing
+### A. Đọc và Ghi File
 
 ```python
 import cv2
 
-# Read image
+# Đọc ảnh
 image = cv2.imread('input.jpg')
 
-# Check if loaded
+# Kiểm tra đã tải thành công chưa
 if image is None:
-    print("Failed to load image")
+    print("Không thể tải ảnh")
 else:
-    print(f"Loaded: {image.shape}")
+    print(f"Đã tải: {image.shape}")
 
-# Write image
+# Ghi ảnh
 cv2.imwrite('output.jpg', image)
 
-# Write with quality (JPEG)
+# Ghi với chất lượng JPEG tùy chỉnh
 cv2.imwrite('output.jpg', image, [cv2.IMWRITE_JPEG_QUALITY, 90])
 ```
 
-### B. Display
+### B. Hiển Thị
 
 ```python
-# Display image
-cv2.imshow('Window Name', image)
-cv2.waitKey(0)  # Wait for key press
+# Hiển thị ảnh
+cv2.imshow('Tên cửa sổ', image)
+cv2.waitKey(0)  # Đợi nhấn phím
 cv2.destroyAllWindows()
 
-# Display for 3 seconds
-cv2.imshow('Window', image)
-cv2.waitKey(3000)  # 3000 ms = 3 seconds
+# Hiển thị trong 3 giây
+cv2.imshow('Cửa sổ', image)
+cv2.waitKey(3000)  # 3000 ms = 3 giây
 cv2.destroyAllWindows()
 ```
 
-### C. Resizing
+### C. Thay Đổi Kích Thước
 
 ```python
-# Resize to specific size
+# Resize về kích thước cụ thể
 resized = cv2.resize(image, (640, 480))
 
-# Resize by scale factor
+# Resize theo tỷ lệ
 scale = 0.5
 width = int(image.shape[1] * scale)
 height = int(image.shape[0] * scale)
 resized = cv2.resize(image, (width, height))
 
-# Resize with interpolation
+# Resize với interpolation
 resized = cv2.resize(image, (640, 480), interpolation=cv2.INTER_LINEAR)
 ```
 
-**Interpolation Methods:**
-- `INTER_NEAREST`: Fastest, lowest quality
-- `INTER_LINEAR`: Good balance (default)
-- `INTER_CUBIC`: Slower, higher quality
-- `INTER_AREA`: Best for downsampling
+**Phương pháp Interpolation (Nội suy):**
+- `INTER_NEAREST`: Nhanh nhất, chất lượng thấp nhất
+- `INTER_LINEAR`: Cân bằng tốt (mặc định)
+- `INTER_CUBIC`: Chậm hơn, chất lượng cao hơn
+- `INTER_AREA`: Tốt nhất cho downsampling (giảm kích thước)
 
-### D. Cropping
+### D. Cắt Ảnh
 
 ```python
-# Crop region [y1:y2, x1:x2]
+# Cắt vùng [y1:y2, x1:x2]
 roi = image[100:300, 200:400]
 
-# Crop center 50%
+# Cắt 50% ở giữa
 h, w = image.shape[:2]
 center_x, center_y = w // 2, h // 2
 crop_w, crop_h = w // 4, h // 4
@@ -188,95 +188,95 @@ cropped = image[
 
 ---
 
-## 4. Pixel Manipulation
+## 4. Thao Tác Với Pixel
 
-### A. Accessing Pixels
+### A. Truy Cập Pixel
 
 ```python
-# Get pixel value (y, x)
-pixel = image[100, 200]  # BGR values
+# Lấy giá trị pixel (y, x)
+pixel = image[100, 200]  # Giá trị BGR
 
-# Grayscale
-gray_pixel = gray_image[100, 200]  # Single value
+# Ảnh xám
+gray_pixel = gray_image[100, 200]  # Giá trị đơn
 
-# Set pixel value
-image[100, 200] = [255, 0, 0]  # Set to blue
+# Đặt giá trị pixel
+image[100, 200] = [255, 0, 0]  # Đặt thành màu xanh dương
 ```
 
-### B. Brightness Adjustment
+### B. Điều Chỉnh Độ Sáng
 
 ```python
-# Increase brightness
+# Tăng độ sáng
 bright = cv2.add(image, 50)
 
-# Decrease brightness
+# Giảm độ sáng
 dark = cv2.subtract(image, 50)
 
-# Using NumPy (with clipping)
+# Sử dụng NumPy (với clipping)
 bright = np.clip(image + 50, 0, 255).astype(np.uint8)
 dark = np.clip(image - 50, 0, 255).astype(np.uint8)
 ```
 
-### C. Contrast Adjustment
+### C. Điều Chỉnh Độ Tương Phản
 
 ```python
-# Increase contrast
+# Tăng độ tương phản
 contrast = cv2.multiply(image, 1.5)
 
-# Formula: output = alpha * input + beta
-alpha = 1.5  # Contrast (1.0-3.0)
-beta = 0     # Brightness (-100 to 100)
+# Công thức: output = alpha * input + beta
+alpha = 1.5  # Độ tương phản (1.0-3.0)
+beta = 0     # Độ sáng (-100 đến 100)
 adjusted = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
 ```
 
 ---
 
-## 5. Image Filtering
+## 5. Image Filtering (Lọc Ảnh)
 
-### A. Blurring
+### A. Làm Mờ (Blurring)
 
-#### 1. Average Blur
+#### 1. Average Blur (Làm mờ trung bình)
 
 ```python
-# Simple averaging
+# Trung bình đơn giản
 blurred = cv2.blur(image, (5, 5))
 ```
 
-#### 2. Gaussian Blur
+#### 2. Gaussian Blur (Làm mờ Gaussian)
 
 ```python
-# Weighted averaging (preferred)
+# Trung bình có trọng số (được ưu tiên)
 blurred = cv2.GaussianBlur(image, (5, 5), 0)
 
-# Kernel size must be odd: 3, 5, 7, 9, ...
+# Kích thước kernel phải lẻ: 3, 5, 7, 9, ...
 ```
 
-#### 3. Median Blur
+#### 3. Median Blur (Làm mờ trung vị)
 
 ```python
-# Good for salt-and-pepper noise
+# Tốt cho nhiễu salt-and-pepper
 denoised = cv2.medianBlur(image, 5)
 ```
 
-#### 4. Bilateral Blur
+#### 4. Bilateral Filter (Lọc song phương)
 
 ```python
-# Preserve edges while smoothing
+# Giữ cạnh trong khi làm mịn
 smoothed = cv2.bilateralFilter(image, 9, 75, 75)
 ```
 
-**Use Cases:**
+**Trường hợp sử dụng:**
 ```
-Average: General smoothing
-Gaussian: Remove Gaussian noise
-Median: Remove salt-and-pepper noise
-Bilateral: Smooth while keeping edges
+Average: Làm mịn chung
+Gaussian: Loại bỏ nhiễu Gaussian
+Median: Loại bỏ nhiễu salt-and-pepper
+Bilateral: Làm mịn nhưng giữ cạnh
 ```
 
-### B. Sharpening
+### B. Làm Sắc Nét (Sharpening)
 
 ```python
-# Sharpening kernel
+# Kernel làm sắc nét
 kernel = np.array([
     [-1, -1, -1],
     [-1,  9, -1],
@@ -288,18 +288,18 @@ sharpened = cv2.filter2D(image, -1, kernel)
 
 ---
 
-## 6. Morphological Operations
+## 6. Morphological Operations (Các Phép Toán Hình Thái)
 
-### A. Basic Operations
+### A. Các Phép Toán Cơ Bản
 
 ```python
-# Define kernel
+# Định nghĩa kernel
 kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
 
-# Erosion (làm mỏng)
+# Erosion (ăn mòn - làm mỏng)
 eroded = cv2.erode(binary_image, kernel, iterations=1)
 
-# Dilation (làm dày)
+# Dilation (giãn nở - làm dày)
 dilated = cv2.dilate(binary_image, kernel, iterations=1)
 
 # Opening (erosion → dilation)
@@ -309,290 +309,290 @@ opened = cv2.morphologyEx(binary_image, cv2.MORPH_OPEN, kernel)
 closed = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
 ```
 
-**Use Cases:**
+**Trường hợp sử dụng:**
 ```
-Erosion:  Remove small white noise
-Dilation: Fill small holes
-Opening:  Remove small objects
-Closing:  Fill small holes in objects
+Erosion:  Loại bỏ nhiễu trắng nhỏ
+Dilation: Lấp đầy lỗ nhỏ
+Opening:  Loại bỏ vật thể nhỏ
+Closing:  Lấp đầy lỗ nhỏ trong vật thể
 ```
 
-### B. Kernel Shapes
+### B. Hình Dạng Kernel
 
 ```python
-# Rectangle
+# Hình chữ nhật
 rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
 
-# Ellipse
+# Hình elip
 ellipse_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
-# Cross
+# Hình chữ thập
 cross_kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (5, 5))
 ```
 
 ---
 
-## 7. Thresholding
+## 7. Thresholding (Ngưỡng Hóa)
 
-### A. Simple Threshold
+### A. Ngưỡng Đơn Giản
 
 ```python
-# Binary threshold
+# Ngưỡng nhị phân
 _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-# Thresholds:
-# - THRESH_BINARY: > threshold → 255, else → 0
-# - THRESH_BINARY_INV: > threshold → 0, else → 255
-# - THRESH_TRUNC: > threshold → threshold, else → same
-# - THRESH_TOZERO: > threshold → same, else → 0
+# Các loại ngưỡng:
+# - THRESH_BINARY: > ngưỡng → 255, ngược lại → 0
+# - THRESH_BINARY_INV: > ngưỡng → 0, ngược lại → 255
+# - THRESH_TRUNC: > ngưỡng → ngưỡng, ngược lại → giữ nguyên
+# - THRESH_TOZERO: > ngưỡng → giữ nguyên, ngược lại → 0
 ```
 
-### B. Otsu's Threshold
+### B. Otsu's Threshold (Ngưỡng Otsu)
 
 ```python
-# Automatic threshold selection
+# Tự động chọn ngưỡng
 _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 ```
 
-### C. Adaptive Threshold
+### C. Adaptive Threshold (Ngưỡng Thích Ứng)
 
 ```python
-# Local threshold
+# Ngưỡng cục bộ
 adaptive = cv2.adaptiveThreshold(
     gray, 255,
     cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
     cv2.THRESH_BINARY,
-    11,  # Block size
-    2    # Constant C
+    11,  # Kích thước block
+    2    # Hằng số C
 )
 ```
 
 ---
 
-## 8. Histograms
+## 8. Histograms (Biểu Đồ)
 
-### A. Calculate Histogram
+### A. Tính Histogram
 
 ```python
-# Grayscale histogram
+# Histogram ảnh xám
 hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
 
-# Color histogram
+# Histogram màu
 hist_b = cv2.calcHist([image], [0], None, [256], [0, 256])  # Blue
 hist_g = cv2.calcHist([image], [1], None, [256], [0, 256])  # Green
 hist_r = cv2.calcHist([image], [2], None, [256], [0, 256])  # Red
 ```
 
-### B. Histogram Equalization
+### B. Histogram Equalization (Cân Bằng Histogram)
 
 ```python
-# Improve contrast
+# Cải thiện độ tương phản
 equalized = cv2.equalizeHist(gray)
 
-# CLAHE (Contrast Limited Adaptive Histogram Equalization)
+# CLAHE (Contrast Limited Adaptive Histogram Equalization - Cân bằng histogram thích ứng có giới hạn tương phản)
 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 enhanced = clahe.apply(gray)
 ```
 
-### C. Visualization
+### C. Trực Quan Hóa
 
 ```python
 import matplotlib.pyplot as plt
 
-# Plot histogram
+# Vẽ histogram
 plt.hist(gray.ravel(), 256, [0, 256])
-plt.title('Grayscale Histogram')
-plt.xlabel('Pixel Value')
-plt.ylabel('Frequency')
+plt.title('Histogram Ảnh Xám')
+plt.xlabel('Giá Trị Pixel')
+plt.ylabel('Tần Suất')
 plt.show()
 ```
 
 ---
 
-## 9. Drawing Functions
+## 9. Các Hàm Vẽ
 
-### A. Shapes
+### A. Hình Dạng
 
 ```python
-# Line
+# Đường thẳng
 cv2.line(image, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
 
-# Rectangle
+# Hình chữ nhật
 cv2.rectangle(image, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
 
-# Circle
-cv2.circle(image, (center_x, center_y), radius=30, color=(0, 0, 255), thickness=-1)  # -1 = filled
+# Hình tròn
+cv2.circle(image, (center_x, center_y), radius=30, color=(0, 0, 255), thickness=-1)  # -1 = tô đầy
 
-# Ellipse
+# Hình elip
 cv2.ellipse(image, (center_x, center_y), (axis1, axis2), angle=0, startAngle=0, endAngle=360, color=(255, 0, 0), thickness=2)
 
-# Polygon
+# Đa giác
 pts = np.array([[100, 100], [200, 100], [200, 200], [100, 200]], np.int32)
 cv2.polylines(image, [pts], isClosed=True, color=(0, 255, 255), thickness=2)
 ```
 
-### B. Text
+### B. Văn Bản
 
 ```python
 cv2.putText(
     image,
     'Hello World',
-    (50, 50),  # Position
+    (50, 50),  # Vị trí
     cv2.FONT_HERSHEY_SIMPLEX,
-    1,  # Font scale
-    (255, 255, 255),  # Color
-    2,  # Thickness
-    cv2.LINE_AA  # Anti-aliased
+    1,  # Kích thước font
+    (255, 255, 255),  # Màu
+    2,  # Độ dày
+    cv2.LINE_AA  # Anti-aliased (khử răng cưa)
 )
 ```
 
 ---
 
-## 10. Practical Examples
+## 10. Ví Dụ Thực Tế
 
-### Example 1: Image Enhancement
+### Ví dụ 1: Cải Thiện Chất Lượng Ảnh
 
 ```python
 def enhance_image(image):
-    """Enhance image quality"""
-    # Convert to grayscale
+    """Cải thiện chất lượng ảnh"""
+    # Chuyển sang ảnh xám
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Apply CLAHE
+    # Áp dụng CLAHE
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(gray)
 
-    # Denoise
+    # Khử nhiễu
     denoised = cv2.fastNlMeansDenoising(enhanced, h=10)
 
-    # Sharpen
+    # Làm sắc nét
     kernel = np.array([[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]])
     sharpened = cv2.filter2D(denoised, -1, kernel)
 
     return sharpened
 ```
 
-### Example 2: Simple Segmentation
+### Ví dụ 2: Phân Vùng Đơn Giản
 
 ```python
 def segment_objects(image):
-    """Segment objects from background"""
-    # Convert to grayscale
+    """Phân vùng vật thể khỏi nền"""
+    # Chuyển sang ảnh xám
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Threshold
+    # Ngưỡng hóa
     _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    # Morphology
+    # Phép toán hình thái
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     cleaned = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
 
     return cleaned
 ```
 
-### Example 3: Batch Processing
+### Ví dụ 3: Xử Lý Hàng Loạt
 
 ```python
 import glob
 
 def process_folder(input_folder, output_folder):
-    """Process all images in folder"""
-    # Get all images
+    """Xử lý tất cả ảnh trong thư mục"""
+    # Lấy tất cả ảnh
     image_paths = glob.glob(f"{input_folder}/*.jpg")
 
     for img_path in image_paths:
-        # Read
+        # Đọc
         image = cv2.imread(img_path)
 
-        # Process
+        # Xử lý
         processed = enhance_image(image)
 
-        # Save
+        # Lưu
         filename = os.path.basename(img_path)
         output_path = os.path.join(output_folder, filename)
         cv2.imwrite(output_path, processed)
 
-        print(f"Processed: {filename}")
+        print(f"Đã xử lý: {filename}")
 ```
 
 ---
 
-## 11. Best Practices
+## 11. Best Practices (Thực Hành Tốt)
 
-### A. Memory Management
+### A. Quản Lý Bộ Nhớ
 
 ```python
-# Release resources
+# Giải phóng tài nguyên
 cv2.destroyAllWindows()
 
-# Delete large arrays
+# Xóa mảng lớn
 del large_image
 
-# Force garbage collection
+# Ép buộc garbage collection
 import gc
 gc.collect()
 ```
 
-### B. Type Safety
+### B. An Toàn Kiểu Dữ Liệu
 
 ```python
-# Always convert to uint8 for display/save
+# Luôn chuyển về uint8 để hiển thị/lưu
 result = np.clip(processed, 0, 255).astype(np.uint8)
 
-# Check data type
-print(image.dtype)  # Should be uint8
+# Kiểm tra kiểu dữ liệu
+print(image.dtype)  # Nên là uint8
 ```
 
-### C. Error Handling
+### C. Xử Lý Lỗi
 
 ```python
 def safe_imread(path):
-    """Safely read image"""
+    """Đọc ảnh an toàn"""
     try:
         image = cv2.imread(path)
         if image is None:
-            raise ValueError(f"Failed to load: {path}")
+            raise ValueError(f"Không thể tải: {path}")
         return image
     except Exception as e:
-        print(f"Error reading image: {e}")
+        print(f"Lỗi đọc ảnh: {e}")
         return None
 ```
 
 ---
 
-## 12. Common Mistakes
+## 12. Lỗi Thường Gặp
 
-### ❌ Wrong Color Space
+### ❌ Sai Color Space (Không Gian Màu)
 
 ```python
-# Wrong: Display BGR in matplotlib
-plt.imshow(cv2.imread('image.jpg'))  # Colors wrong!
+# Sai: Hiển thị BGR trong matplotlib
+plt.imshow(cv2.imread('image.jpg'))  # Màu sai!
 
-# Correct: Convert to RGB
+# Đúng: Chuyển sang RGB
 image = cv2.imread('image.jpg')
 plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 ```
 
-### ❌ Array Out of Bounds
+### ❌ Vượt Quá Giới Hạn Mảng
 
 ```python
-# Wrong: No boundary check
-pixel = image[1000, 1000]  # May crash!
+# Sai: Không kiểm tra biên
+pixel = image[1000, 1000]  # Có thể bị crash!
 
-# Correct: Check bounds
+# Đúng: Kiểm tra biên
 h, w = image.shape[:2]
 if 0 <= y < h and 0 <= x < w:
     pixel = image[y, x]
 ```
 
-### ❌ Incorrect Dimensions
+### ❌ Nhầm Lẫn Chiều
 
 ```python
-# Wrong: (x, y) vs (y, x) confusion
-cv2.rectangle(image, (y1, x1), (y2, x2), color)  # Wrong!
+# Sai: Nhầm lẫn (x, y) vs (y, x)
+cv2.rectangle(image, (y1, x1), (y2, x2), color)  # Sai!
 
-# Correct: OpenCV uses (x, y)
-cv2.rectangle(image, (x1, y1), (x2, y2), color)  # Correct
+# Đúng: OpenCV dùng (x, y)
+cv2.rectangle(image, (x1, y1), (x2, y2), color)  # Đúng
 ```
 
 ---

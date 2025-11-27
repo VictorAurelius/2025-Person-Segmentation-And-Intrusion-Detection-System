@@ -1,32 +1,32 @@
-# Object Tracking
+# Object Tracking (Theo Dõi Đối Tượng)
 
 ## 1. Khái Niệm
 
-**Object Tracking** là quá trình locating một moving object (hoặc nhiều objects) theo thời gian sử dụng camera.
+**Object Tracking (Theo dõi đối tượng)** là quá trình định vị một moving object (đối tượng chuyển động) (hoặc nhiều objects) theo thời gian sử dụng camera.
 
 ### A. Tracking vs Detection
 
-| Aspect | Detection | Tracking |
-|--------|-----------|----------|
-| Goal | Find objects in single frame | Follow objects across frames |
-| Speed | Slower | Faster |
-| Consistency | No history | Uses temporal information |
-| ID | No persistent ID | Maintains object ID |
+| Khía Cạnh | Detection (Phát Hiện) | Tracking (Theo Dõi) |
+|-----------|-----------|----------|
+| Mục Tiêu | Tìm objects trong single frame | Theo dõi objects qua các frames |
+| Tốc Độ | Chậm hơn | Nhanh hơn |
+| Tính Nhất Quán | Không có lịch sử | Sử dụng thông tin temporal |
+| ID | Không có ID liên tục | Duy trì object ID |
 
 ---
 
-## 2. Centroid Tracking
+## 2. Centroid Tracking (Theo Dõi Tâm Điểm)
 
-### A. Algorithm
+### A. Thuật Toán
 
 ```
-1. Detect objects in frame
-2. Calculate centroids
-3. Match with previous centroids
-4. Update IDs
+1. Phát hiện objects trong frame
+2. Tính toán centroids (tâm điểm)
+3. Khớp với centroids trước đó
+4. Cập nhật IDs
 ```
 
-### B. Implementation
+### B. Triển Khai
 
 ```python
 from scipy.spatial import distance as dist
@@ -42,31 +42,31 @@ class CentroidTracker:
         self.max_disappeared = max_disappeared
 
     def register(self, centroid):
-        """Register new object"""
+        """Đăng ký object mới"""
         self.objects[self.next_object_id] = centroid
         self.disappeared[self.next_object_id] = 0
         self.next_object_id += 1
 
     def deregister(self, object_id):
-        """Deregister object"""
+        """Hủy đăng ký object"""
         del self.objects[object_id]
         del self.disappeared[object_id]
 
     def update(self, bboxes):
-        """Update tracker with new detections"""
+        """Cập nhật tracker với detections mới"""
 
-        # No detections
+        # Không có detections
         if len(bboxes) == 0:
             for object_id in list(self.disappeared.keys()):
                 self.disappeared[object_id] += 1
 
-                # Deregister if disappeared too long
+                # Hủy đăng ký nếu biến mất quá lâu
                 if self.disappeared[object_id] > self.max_disappeared:
                     self.deregister(object_id)
 
             return self.objects
 
-        # Calculate centroids from bboxes
+        # Tính toán centroids từ bboxes
         input_centroids = np.zeros((len(bboxes), 2), dtype="int")
 
         for (i, (x, y, w, h)) in enumerate(bboxes):
@@ -74,20 +74,20 @@ class CentroidTracker:
             cy = int(y + h / 2.0)
             input_centroids[i] = (cx, cy)
 
-        # No existing objects
+        # Không có objects hiện có
         if len(self.objects) == 0:
             for centroid in input_centroids:
                 self.register(centroid)
 
-        # Match existing objects to new centroids
+        # Khớp objects hiện có với centroids mới
         else:
             object_ids = list(self.objects.keys())
             object_centroids = list(self.objects.values())
 
-            # Calculate distance matrix
+            # Tính toán distance matrix
             D = dist.cdist(np.array(object_centroids), input_centroids)
 
-            # Find minimum distance matches
+            # Tìm các kết cặp khoảng cách tối thiểu
             rows = D.min(axis=1).argsort()
             cols = D.argmin(axis=1)[rows]
 
@@ -98,7 +98,7 @@ class CentroidTracker:
                 if row in used_rows or col in used_cols:
                     continue
 
-                # Update object centroid
+                # Cập nhật object centroid
                 object_id = object_ids[row]
                 self.objects[object_id] = input_centroids[col]
                 self.disappeared[object_id] = 0
@@ -106,7 +106,7 @@ class CentroidTracker:
                 used_rows.add(row)
                 used_cols.add(col)
 
-            # Handle disappeared objects
+            # Xử lý objects biến mất
             unused_rows = set(range(0, D.shape[0])) - used_rows
             for row in unused_rows:
                 object_id = object_ids[row]
@@ -115,7 +115,7 @@ class CentroidTracker:
                 if self.disappeared[object_id] > self.max_disappeared:
                     self.deregister(object_id)
 
-            # Register new objects
+            # Đăng ký objects mới
             unused_cols = set(range(0, D.shape[1])) - used_cols
             for col in unused_cols:
                 self.register(input_centroids[col])
@@ -123,7 +123,7 @@ class CentroidTracker:
         return self.objects
 
 
-# Usage
+# Sử dụng
 tracker = CentroidTracker(max_disappeared=50)
 
 while True:
@@ -131,13 +131,13 @@ while True:
     if not ret:
         break
 
-    # Detect objects (returns bounding boxes)
+    # Phát hiện objects (trả về bounding boxes)
     bboxes = detect_objects(frame)  # [(x, y, w, h), ...]
 
-    # Update tracker
+    # Cập nhật tracker
     objects = tracker.update(bboxes)
 
-    # Draw tracked objects
+    # Vẽ tracked objects
     for (object_id, centroid) in objects.items():
         text = f"ID {object_id}"
         cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
@@ -153,7 +153,7 @@ while True:
 
 ## 3. OpenCV Trackers
 
-### A. Available Trackers
+### A. Các Trackers Có Sẵn
 
 OpenCV cung cấp nhiều tracking algorithms:
 
@@ -174,16 +174,16 @@ tracker = cv2.legacy.TrackerMedianFlow_create()
 tracker = cv2.TrackerMIL_create()
 ```
 
-### B. Basic Usage
+### B. Sử Dụng Cơ Bản
 
 ```python
-# Select ROI
+# Chọn ROI
 bbox = cv2.selectROI('Frame', frame, False)
 
-# Create tracker
+# Tạo tracker
 tracker = cv2.TrackerCSRT_create()
 
-# Initialize
+# Khởi tạo
 tracker.init(frame, bbox)
 
 while True:
@@ -191,15 +191,15 @@ while True:
     if not ret:
         break
 
-    # Update tracker
+    # Cập nhật tracker
     success, bbox = tracker.update(frame)
 
     if success:
-        # Draw bounding box
+        # Vẽ bounding box
         x, y, w, h = [int(v) for v in bbox]
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
     else:
-        cv2.putText(frame, "Lost", (10, 30),
+        cv2.putText(frame, "Mat", (10, 30),
                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     cv2.imshow('Tracking', frame)
@@ -207,11 +207,11 @@ while True:
         break
 ```
 
-### C. Multi-Object Tracking
+### C. Multi-Object Tracking (Theo Dõi Nhiều Đối Tượng)
 
 ```python
 class MultiTracker:
-    """Track multiple objects using OpenCV trackers"""
+    """Theo dõi nhiều objects sử dụng OpenCV trackers"""
 
     def __init__(self, tracker_type='CSRT'):
         self.tracker_type = tracker_type
@@ -219,9 +219,9 @@ class MultiTracker:
         self.colors = []
 
     def add(self, frame, bbox):
-        """Add new tracker"""
+        """Thêm tracker mới"""
 
-        # Create tracker
+        # Tạo tracker
         if self.tracker_type == 'CSRT':
             tracker = cv2.TrackerCSRT_create()
         elif self.tracker_type == 'KCF':
@@ -231,15 +231,15 @@ class MultiTracker:
         else:
             tracker = cv2.TrackerCSRT_create()
 
-        # Initialize
+        # Khởi tạo
         tracker.init(frame, bbox)
 
-        # Store
+        # Lưu trữ
         self.trackers.append(tracker)
         self.colors.append(tuple(np.random.randint(0, 255, 3).tolist()))
 
     def update(self, frame):
-        """Update all trackers"""
+        """Cập nhật tất cả trackers"""
 
         results = []
 
@@ -256,16 +256,16 @@ class MultiTracker:
         return results
 
     def remove(self, tracker_id):
-        """Remove tracker"""
+        """Xóa tracker"""
         if 0 <= tracker_id < len(self.trackers):
             del self.trackers[tracker_id]
             del self.colors[tracker_id]
 
 
-# Usage
+# Sử dụng
 multi_tracker = MultiTracker(tracker_type='CSRT')
 
-# Select multiple ROIs
+# Chọn nhiều ROIs
 while True:
     bbox = cv2.selectROI('Select Object', frame, False)
     if bbox[2] == 0 or bbox[3] == 0:
@@ -273,16 +273,16 @@ while True:
 
     multi_tracker.add(frame, bbox)
 
-# Tracking loop
+# Vòng lặp tracking
 while True:
     ret, frame = cap.read()
     if not ret:
         break
 
-    # Update all trackers
+    # Cập nhật tất cả trackers
     results = multi_tracker.update(frame)
 
-    # Draw results
+    # Vẽ kết quả
     for result in results:
         x, y, w, h = [int(v) for v in result['bbox']]
         cv2.rectangle(frame, (x, y), (x + w, y + h), result['color'], 2)
@@ -300,19 +300,19 @@ while True:
 
 ## 4. Kalman Filter Tracking
 
-### A. Concept
+### A. Khái Niệm
 
-Kalman Filter predicts object position and corrects prediction using measurements.
+Kalman Filter dự đoán vị trí object và điều chỉnh dự đoán sử dụng measurements (đo đạc).
 
-### B. Implementation
+### B. Triển Khai
 
 ```python
 class KalmanTracker:
     """Kalman filter-based object tracker"""
 
     def __init__(self):
-        # Create Kalman filter
-        # State: [x, y, dx, dy] (position + velocity)
+        # Tạo Kalman filter
+        # State: [x, y, dx, dy] (vị trí + vận tốc)
         self.kalman = cv2.KalmanFilter(4, 2)
 
         # Transition matrix
@@ -336,22 +336,22 @@ class KalmanTracker:
         self.kalman.measurementNoiseCov = np.eye(2, dtype=np.float32) * 0.1
 
     def predict(self):
-        """Predict next position"""
+        """Dự đoán vị trí tiếp theo"""
         prediction = self.kalman.predict()
-        return prediction[:2].flatten()  # Return [x, y]
+        return prediction[:2].flatten()  # Trả về [x, y]
 
     def correct(self, measurement):
-        """Correct prediction with measurement"""
+        """Điều chỉnh dự đoán với measurement"""
         measurement = np.array([[np.float32(measurement[0])],
                                [np.float32(measurement[1])]])
         corrected = self.kalman.correct(measurement)
         return corrected[:2].flatten()
 
 
-# Usage
+# Sử dụng
 tracker = KalmanTracker()
 
-# Initialize with first detection
+# Khởi tạo với detection đầu tiên
 first_detection = (100, 100)  # (x, y)
 tracker.kalman.statePost = np.array([
     [first_detection[0]],
@@ -365,21 +365,21 @@ while True:
     if not ret:
         break
 
-    # Predict
+    # Dự đoán
     predicted = tracker.predict()
 
-    # Detect object (returns centroid or None)
+    # Phát hiện object (trả về centroid hoặc None)
     detection = detect_object(frame)
 
     if detection is not None:
-        # Correct with measurement
+        # Điều chỉnh với measurement
         corrected = tracker.correct(detection)
 
-        # Draw detection (red) and corrected (green)
+        # Vẽ detection (đỏ) và corrected (xanh lá)
         cv2.circle(frame, tuple(detection.astype(int)), 5, (0, 0, 255), -1)
         cv2.circle(frame, tuple(corrected.astype(int)), 5, (0, 255, 0), -1)
     else:
-        # No detection, use prediction only
+        # Không có detection, chỉ dùng dự đoán
         cv2.circle(frame, tuple(predicted.astype(int)), 5, (255, 0, 0), -1)
 
     cv2.imshow('Kalman Tracking', frame)
@@ -391,7 +391,7 @@ while True:
 
 ## 5. DeepSORT-inspired Tracking
 
-### A. Simplified DeepSORT
+### A. DeepSORT Đơn Giản Hóa
 
 ```python
 from scipy.spatial import distance as dist
@@ -406,10 +406,10 @@ class Track:
         self.age = 0
         self.time_since_update = 0
         self.hit_streak = 0
-        self.state = 'tentative'  # tentative or confirmed
+        self.state = 'tentative'  # tentative hoặc confirmed
 
     def update(self, bbox, feature=None):
-        """Update track with new detection"""
+        """Cập nhật track với detection mới"""
         self.bbox = bbox
         if feature is not None:
             self.feature = feature
@@ -421,7 +421,7 @@ class Track:
             self.state = 'confirmed'
 
     def mark_missed(self):
-        """Mark track as missed"""
+        """Đánh dấu track bị missed"""
         self.time_since_update += 1
         self.hit_streak = 0
 
@@ -437,40 +437,40 @@ class SimpleDeepSORT:
 
     def update(self, detections):
         """
-        Update tracks with new detections
+        Cập nhật tracks với detections mới
 
         detections: list of (bbox, feature)
         """
 
-        # Predict (in full DeepSORT, use Kalman filter here)
+        # Dự đoán (trong DeepSORT đầy đủ, sử dụng Kalman filter ở đây)
 
-        # Match detections to tracks
+        # Khớp detections với tracks
         matched, unmatched_dets, unmatched_tracks = self._match(detections)
 
-        # Update matched tracks
+        # Cập nhật matched tracks
         for track_idx, det_idx in matched:
             bbox, feature = detections[det_idx]
             self.tracks[track_idx].update(bbox, feature)
 
-        # Create new tracks for unmatched detections
+        # Tạo tracks mới cho unmatched detections
         for det_idx in unmatched_dets:
             bbox, feature = detections[det_idx]
             self.tracks.append(Track(self.next_id, bbox, feature))
             self.next_id += 1
 
-        # Mark unmatched tracks as missed
+        # Đánh dấu unmatched tracks là missed
         for track_idx in unmatched_tracks:
             self.tracks[track_idx].mark_missed()
 
-        # Remove dead tracks
+        # Xóa tracks đã chết
         self.tracks = [t for t in self.tracks
                       if t.time_since_update <= self.max_age]
 
-        # Return confirmed tracks
+        # Trả về confirmed tracks
         return [t for t in self.tracks if t.state == 'confirmed']
 
     def _match(self, detections):
-        """Match detections to tracks"""
+        """Khớp detections với tracks"""
 
         if len(self.tracks) == 0:
             return [], list(range(len(detections))), []
@@ -478,19 +478,19 @@ class SimpleDeepSORT:
         if len(detections) == 0:
             return [], [], list(range(len(self.tracks)))
 
-        # Calculate IoU matrix
+        # Tính toán IoU matrix
         iou_matrix = np.zeros((len(self.tracks), len(detections)))
 
         for i, track in enumerate(self.tracks):
             for j, (det_bbox, _) in enumerate(detections):
                 iou_matrix[i, j] = self._iou(track.bbox, det_bbox)
 
-        # Hungarian matching (simplified: greedy)
+        # Hungarian matching (đơn giản hóa: greedy)
         matched_indices = []
 
         for _ in range(min(len(self.tracks), len(detections))):
             max_iou = iou_matrix.max()
-            if max_iou < 0.3:  # Threshold
+            if max_iou < 0.3:  # Ngưỡng
                 break
 
             i, j = np.unravel_index(iou_matrix.argmax(), iou_matrix.shape)
@@ -510,7 +510,7 @@ class SimpleDeepSORT:
         return matched_indices, unmatched_dets, unmatched_tracks
 
     def _iou(self, bbox1, bbox2):
-        """Calculate IoU between two bounding boxes"""
+        """Tính toán IoU giữa hai bounding boxes"""
         x1, y1, w1, h1 = bbox1
         x2, y2, w2, h2 = bbox2
 
@@ -532,26 +532,26 @@ class SimpleDeepSORT:
 
 ---
 
-## 6. Performance Comparison
+## 6. So Sánh Hiệu Năng
 
-| Tracker | Speed | Accuracy | Robustness | Use Case |
+| Tracker | Tốc Độ | Độ Chính Xác | Độ Ổn Định | Trường Hợp Sử Dụng |
 |---------|-------|----------|------------|----------|
-| Centroid | Very Fast ✅ | Low | Low | Simple scenes |
-| MOSSE | Fast ✅ | Medium | Medium | Real-time |
-| KCF | Fast ✅ | Good | Good | General |
-| CSRT | Slow ⚠️ | Excellent ✅ | Excellent ✅ | Accuracy critical |
-| Kalman | Fast ✅ | Good | Good | Smooth motion |
-| DeepSORT | Medium | Excellent ✅ | Excellent ✅ | Multi-object |
+| Centroid | Rất Nhanh | Thấp | Thấp | Cảnh đơn giản |
+| MOSSE | Nhanh | Trung Bình | Trung Bình | Thời gian thực |
+| KCF | Nhanh | Tốt | Tốt | Chung |
+| CSRT | Chậm | Xuất Sắc | Xuất Sắc | Quan trọng độ chính xác |
+| Kalman | Nhanh | Tốt | Tốt | Chuyển động mượt |
+| DeepSORT | Trung Bình | Xuất Sắc | Xuất Sắc | Nhiều đối tượng |
 
 ---
 
-## 7. Best Practices
+## 7. Best Practices (Thực Hành Tốt)
 
-### A. Tracker Selection
+### A. Lựa Chọn Tracker
 
 ```python
 def select_tracker(scenario):
-    """Select appropriate tracker for scenario"""
+    """Chọn tracker phù hợp cho kịch bản"""
 
     if scenario == 'fast_cpu':
         return cv2.TrackerMOSSE_create()
@@ -569,11 +569,11 @@ def select_tracker(scenario):
         return cv2.TrackerKCF_create()
 ```
 
-### B. Re-detection
+### B. Re-detection (Phát Hiện Lại)
 
 ```python
 class RobustTracker:
-    """Tracker with re-detection capability"""
+    """Tracker với khả năng re-detection"""
 
     def __init__(self, detector, tracker_type='KCF'):
         self.detector = detector
@@ -584,7 +584,7 @@ class RobustTracker:
         self.max_failures = 5
 
     def update(self, frame):
-        """Update tracker or re-detect"""
+        """Cập nhật tracker hoặc re-detect"""
 
         if self.tracker is None or self.failures >= self.max_failures:
             # Re-detect
@@ -610,7 +610,7 @@ class RobustTracker:
             return False, None
 
     def _reinit_tracker(self, frame, bbox):
-        """Re-initialize tracker"""
+        """Khởi tạo lại tracker"""
         if self.tracker_type == 'KCF':
             self.tracker = cv2.TrackerKCF_create()
         elif self.tracker_type == 'CSRT':

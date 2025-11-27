@@ -1,32 +1,32 @@
-# OpenCV Essentials
+# OpenCV Essentials (Kiến Thức Cơ Bản OpenCV)
 
-## 1. OpenCV Introduction
+## 1. Giới Thiệu OpenCV
 
-### A. Giới Thiệu
+### A. Tổng Quan
 
-**OpenCV** (Open Source Computer Vision Library) là thư viện mã nguồn mở cho computer vision và machine learning.
+**OpenCV** (Open Source Computer Vision Library - Thư viện Thị Giác Máy Tính Mã Nguồn Mở) là thư viện mã nguồn mở cho Computer Vision (Thị Giác Máy Tính) và Machine Learning (Học Máy).
 
 **Tính năng chính:**
-- 2500+ optimized algorithms
+- 2500+ thuật toán được tối ưu hóa
 - Hỗ trợ Python, C++, Java
-- Cross-platform (Windows, Linux, macOS, Android, iOS)
-- Real-time processing
-- GPU acceleration (CUDA)
+- Cross-platform (đa nền tảng): Windows, Linux, macOS, Android, iOS
+- Real-time processing (xử lý thời gian thực)
+- GPU acceleration (tăng tốc GPU) với CUDA
 
-### B. Installation
+### B. Cài Đặt
 
 ```bash
-# Basic OpenCV
+# OpenCV cơ bản
 pip install opencv-python
 
-# With contrib modules (extra features)
+# Với các contrib modules (tính năng mở rộng)
 pip install opencv-contrib-python
 
-# Verify installation
+# Kiểm tra cài đặt
 python -c "import cv2; print(cv2.__version__)"
 ```
 
-### C. Import Convention
+### C. Quy Ước Import
 
 ```python
 import cv2
@@ -37,114 +37,114 @@ print(f"OpenCV version: {cv2.__version__}")
 
 ---
 
-## 2. Video Processing
+## 2. Xử Lý Video
 
-### A. Video Capture
+### A. Video Capture (Chụp Video)
 
-#### From File
+#### Từ File
 
 ```python
-# Open video file
+# Mở file video
 cap = cv2.VideoCapture('video.mp4')
 
-# Check if opened
+# Kiểm tra đã mở thành công chưa
 if not cap.isOpened():
-    print("Error opening video file")
+    print("Lỗi khi mở file video")
     exit()
 
-# Get video properties
+# Lấy thuộc tính video
 fps = cap.get(cv2.CAP_PROP_FPS)
 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
 print(f"FPS: {fps}")
-print(f"Resolution: {width}x{height}")
-print(f"Total frames: {frame_count}")
+print(f"Độ phân giải: {width}x{height}")
+print(f"Tổng số frames: {frame_count}")
 ```
 
-#### From Webcam
+#### Từ Webcam
 
 ```python
-# Open webcam (0 = default camera)
+# Mở webcam (0 = camera mặc định)
 cap = cv2.VideoCapture(0)
 
-# Set resolution
+# Đặt độ phân giải
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-# Set FPS
+# Đặt FPS
 cap.set(cv2.CAP_PROP_FPS, 30)
 ```
 
-### B. Reading Frames
+### B. Đọc Frames
 
 ```python
 while True:
-    # Read frame
+    # Đọc frame
     ret, frame = cap.read()
 
-    # Check if frame read successfully
+    # Kiểm tra đã đọc thành công chưa
     if not ret:
-        print("End of video or error")
+        print("Kết thúc video hoặc lỗi")
         break
 
-    # Process frame here
+    # Xử lý frame tại đây
     cv2.imshow('Frame', frame)
 
-    # Exit on 'q' press
+    # Thoát khi nhấn 'q'
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release resources
+# Giải phóng tài nguyên
 cap.release()
 cv2.destroyAllWindows()
 ```
 
-### C. Video Writing
+### C. Ghi Video
 
 ```python
-# Define codec
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # or 'XVID', 'MJPG'
+# Định nghĩa codec
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # hoặc 'XVID', 'MJPG'
 
-# Create VideoWriter
+# Tạo VideoWriter
 out = cv2.VideoWriter(
     'output.mp4',
     fourcc,
     30.0,  # FPS
-    (640, 480)  # Resolution (width, height)
+    (640, 480)  # Độ phân giải (width, height)
 )
 
-# Write frames
+# Ghi frames
 while cap.isOpened():
     ret, frame = cap.read()
     if ret:
-        # Process frame
+        # Xử lý frame
         processed = process_frame(frame)
 
-        # Write
+        # Ghi
         out.write(processed)
     else:
         break
 
-# Release
+# Giải phóng
 out.release()
 ```
 
-### D. Advanced Video Operations
+### D. Thao Tác Video Nâng Cao
 
 ```python
-# Seek to specific frame
-cap.set(cv2.CAP_PROP_POS_FRAMES, 100)  # Jump to frame 100
+# Nhảy đến frame cụ thể
+cap.set(cv2.CAP_PROP_POS_FRAMES, 100)  # Nhảy đến frame 100
 
-# Get current frame position
+# Lấy vị trí frame hiện tại
 current_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
 
-# Get video duration
+# Lấy thời lượng video
 duration = frame_count / fps
-print(f"Duration: {duration:.2f} seconds")
+print(f"Thời lượng: {duration:.2f} giây")
 
-# Skip frames (for performance)
+# Bỏ qua frames (để tăng hiệu suất)
 skip_frames = 2
 frame_counter = 0
 
@@ -155,24 +155,24 @@ while True:
 
     frame_counter += 1
     if frame_counter % skip_frames != 0:
-        continue  # Skip this frame
+        continue  # Bỏ qua frame này
 
-    # Process every Nth frame
+    # Xử lý mỗi frame thứ N
     process_frame(frame)
 ```
 
 ---
 
-## 3. Background Subtraction
+## 3. Background Subtraction (Trừ Nền)
 
 ### A. MOG2
 
 ```python
-# Create MOG2 background subtractor
+# Tạo MOG2 background subtractor
 bg_subtractor = cv2.createBackgroundSubtractorMOG2(
-    history=500,           # Number of frames to learn from
-    varThreshold=16,       # Threshold for detection
-    detectShadows=True     # Detect and mark shadows
+    history=500,           # Số frame để học
+    varThreshold=16,       # Ngưỡng phát hiện
+    detectShadows=True     # Phát hiện và đánh dấu bóng
 )
 
 while True:
@@ -180,10 +180,10 @@ while True:
     if not ret:
         break
 
-    # Apply background subtraction
+    # Áp dụng background subtraction
     fg_mask = bg_subtractor.apply(frame)
 
-    # Display
+    # Hiển thị
     cv2.imshow('Original', frame)
     cv2.imshow('Foreground Mask', fg_mask)
 
@@ -191,134 +191,134 @@ while True:
         break
 ```
 
-**Parameters:**
-- `history`: Larger = more stable, slower adaptation
-- `varThreshold`: Lower = more sensitive
-- `detectShadows`: True = marks shadows (value 127)
+**Tham số:**
+- `history`: Lớn hơn = ổn định hơn, thích ứng chậm hơn
+- `varThreshold`: Thấp hơn = nhạy hơn
+- `detectShadows`: True = đánh dấu bóng (giá trị 127)
 
 ### B. KNN
 
 ```python
-# Create KNN background subtractor
+# Tạo KNN background subtractor
 bg_subtractor = cv2.createBackgroundSubtractorKNN(
     history=500,
     dist2Threshold=400.0,
     detectShadows=True
 )
 
-# Usage same as MOG2
+# Sử dụng giống như MOG2
 fg_mask = bg_subtractor.apply(frame)
 ```
 
-**KNN vs MOG2:**
-- KNN: Better with noise, slower
-- MOG2: Faster, good for most cases
+**KNN so với MOG2:**
+- KNN: Tốt hơn với nhiễu, chậm hơn
+- MOG2: Nhanh hơn, tốt cho hầu hết trường hợp
 
-### C. Background Image
+### C. Ảnh Nền
 
 ```python
-# Get learned background
+# Lấy ảnh nền đã học
 background = bg_subtractor.getBackgroundImage()
 
-# Display
+# Hiển thị
 cv2.imshow('Learned Background', background)
 ```
 
 ---
 
-## 4. Contour Detection
+## 4. Contour Detection (Phát Hiện Đường Viền)
 
-### A. Find Contours
+### A. Tìm Contours
 
 ```python
-# Convert to grayscale
+# Chuyển sang ảnh xám
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-# Threshold
+# Ngưỡng hóa
 _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-# Find contours
+# Tìm contours
 contours, hierarchy = cv2.findContours(
     binary,
-    cv2.RETR_EXTERNAL,  # Retrieval mode
-    cv2.CHAIN_APPROX_SIMPLE  # Approximation method
+    cv2.RETR_EXTERNAL,  # Chế độ truy xuất
+    cv2.CHAIN_APPROX_SIMPLE  # Phương pháp xấp xỉ
 )
 
-print(f"Found {len(contours)} contours")
+print(f"Tìm thấy {len(contours)} contours")
 ```
 
-**Retrieval Modes:**
-- `RETR_EXTERNAL`: Only outermost contours
-- `RETR_LIST`: All contours, no hierarchy
-- `RETR_TREE`: Full hierarchy
+**Retrieval Modes (Chế Độ Truy Xuất):**
+- `RETR_EXTERNAL`: Chỉ contours ngoài cùng
+- `RETR_LIST`: Tất cả contours, không có hierarchy
+- `RETR_TREE`: Hierarchy đầy đủ
 
-**Approximation Methods:**
-- `CHAIN_APPROX_NONE`: All points
-- `CHAIN_APPROX_SIMPLE`: Only corner points (saves memory)
+**Approximation Methods (Phương Pháp Xấp Xỉ):**
+- `CHAIN_APPROX_NONE`: Tất cả điểm
+- `CHAIN_APPROX_SIMPLE`: Chỉ các điểm góc (tiết kiệm bộ nhớ)
 
-### B. Draw Contours
+### B. Vẽ Contours
 
 ```python
-# Draw all contours
+# Vẽ tất cả contours
 cv2.drawContours(frame, contours, -1, (0, 255, 0), 2)
 
-# Draw specific contour
-cv2.drawContours(frame, contours, 0, (0, 255, 0), 2)  # Draw first contour
+# Vẽ contour cụ thể
+cv2.drawContours(frame, contours, 0, (0, 255, 0), 2)  # Vẽ contour đầu tiên
 
-# Draw filled
+# Vẽ tô đầy
 cv2.drawContours(frame, contours, -1, (0, 255, 0), -1)
 ```
 
-### C. Contour Properties
+### C. Thuộc Tính Contour
 
 ```python
 for contour in contours:
-    # Area
+    # Diện tích
     area = cv2.contourArea(contour)
 
-    # Perimeter
+    # Chu vi
     perimeter = cv2.arcLength(contour, closed=True)
 
-    # Bounding rectangle
+    # Bounding rectangle (hình chữ nhật bao)
     x, y, w, h = cv2.boundingRect(contour)
     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-    # Minimum area rectangle (rotated)
+    # Minimum area rectangle (hình chữ nhật xoay)
     rect = cv2.minAreaRect(contour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
     cv2.drawContours(frame, [box], 0, (0, 0, 255), 2)
 
-    # Centroid
+    # Centroid (tâm)
     M = cv2.moments(contour)
     if M["m00"] != 0:
         cx = int(M["m10"] / M["m00"])
         cy = int(M["m01"] / M["m00"])
         cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)
 
-    # Convex hull
+    # Convex hull (bao lồi)
     hull = cv2.convexHull(contour)
 
-    # Aspect ratio
+    # Aspect ratio (tỷ lệ khung hình)
     aspect_ratio = float(w) / h
 
-    # Extent (ratio of contour area to bounding box area)
+    # Extent (tỷ lệ diện tích contour so với diện tích bounding box)
     rect_area = w * h
     extent = float(area) / rect_area
 
-    # Solidity (ratio of contour area to convex hull area)
+    # Solidity (tỷ lệ diện tích contour so với diện tích convex hull)
     hull_area = cv2.contourArea(hull)
     solidity = float(area) / hull_area
 ```
 
-### D. Contour Filtering
+### D. Lọc Contour
 
 ```python
-# Filter by area
+# Lọc theo diện tích
 min_area = 500
 filtered_contours = [c for c in contours if cv2.contourArea(c) > min_area]
 
-# Filter by aspect ratio (for vertical objects like people)
+# Lọc theo aspect ratio (cho vật thể dọc như người)
 def filter_by_aspect_ratio(contours, min_ratio=0.3, max_ratio=3.0):
     filtered = []
     for c in contours:
@@ -328,7 +328,7 @@ def filter_by_aspect_ratio(contours, min_ratio=0.3, max_ratio=3.0):
             filtered.append(c)
     return filtered
 
-# Filter by solidity (compact objects)
+# Lọc theo solidity (vật thể chặt)
 def filter_by_solidity(contours, min_solidity=0.8):
     filtered = []
     for c in contours:
@@ -343,57 +343,57 @@ def filter_by_solidity(contours, min_solidity=0.8):
 
 ---
 
-## 5. ROI Operations
+## 5. Thao Tác ROI
 
-### A. Point in Polygon
+### A. Point in Polygon (Điểm Trong Đa Giác)
 
 ```python
-# Define ROI polygon
+# Định nghĩa ROI polygon
 roi_points = np.array([[100, 100], [300, 100], [300, 300], [100, 300]])
 
-# Check if point is inside
+# Kiểm tra xem điểm có nằm bên trong không
 point = (200, 200)
 result = cv2.pointPolygonTest(roi_points, point, False)
 
 if result >= 0:
-    print("Point inside ROI")
+    print("Điểm nằm trong ROI")
 else:
-    print("Point outside ROI")
+    print("Điểm nằm ngoài ROI")
 ```
 
-### B. Mask Creation
+### B. Tạo Mask
 
 ```python
-# Create mask from polygon
+# Tạo mask từ polygon
 mask = np.zeros(frame.shape[:2], dtype=np.uint8)
 cv2.fillPoly(mask, [roi_points], 255)
 
-# Apply mask to image
+# Áp dụng mask lên ảnh
 masked_frame = cv2.bitwise_and(frame, frame, mask=mask)
 ```
 
-### C. ROI Overlap
+### C. Tính Chồng Lấn ROI
 
 ```python
 def calculate_overlap(contour, roi_polygon):
-    """Calculate overlap percentage between contour and ROI"""
-    # Create masks
-    h, w = 1080, 1920  # Frame size
+    """Tính phần trăm chồng lấn giữa contour và ROI"""
+    # Tạo masks
+    h, w = 1080, 1920  # Kích thước frame
     contour_mask = np.zeros((h, w), dtype=np.uint8)
     roi_mask = np.zeros((h, w), dtype=np.uint8)
 
-    # Fill masks
+    # Tô đầy masks
     cv2.drawContours(contour_mask, [contour], -1, 255, -1)
     cv2.fillPoly(roi_mask, [roi_polygon], 255)
 
-    # Calculate intersection
+    # Tính giao điểm
     intersection = cv2.bitwise_and(contour_mask, roi_mask)
     intersection_area = cv2.countNonZero(intersection)
 
-    # Calculate contour area
+    # Tính diện tích contour
     contour_area = cv2.contourArea(contour)
 
-    # Overlap percentage
+    # Phần trăm chồng lấn
     if contour_area > 0:
         overlap = intersection_area / contour_area
     else:
@@ -404,37 +404,37 @@ def calculate_overlap(contour, roi_polygon):
 
 ---
 
-## 6. Performance Optimization
+## 6. Tối Ưu Hiệu Suất
 
-### A. Reduce Resolution
+### A. Giảm Độ Phân Giải
 
 ```python
-# Resize for processing
+# Resize để xử lý
 scale = 0.5
 small_frame = cv2.resize(frame, None, fx=scale, fy=scale)
 
-# Process smaller frame
+# Xử lý frame nhỏ hơn
 processed_small = process(small_frame)
 
-# Resize back if needed
+# Resize lại nếu cần
 processed = cv2.resize(processed_small, (frame.shape[1], frame.shape[0]))
 ```
 
-### B. ROI Processing
+### B. Xử Lý ROI
 
 ```python
-# Only process ROI area
+# Chỉ xử lý vùng ROI
 x, y, w, h = 100, 100, 400, 300
 roi = frame[y:y+h, x:x+w]
 
-# Process ROI
+# Xử lý ROI
 processed_roi = process(roi)
 
-# Put back
+# Đặt lại
 frame[y:y+h, x:x+w] = processed_roi
 ```
 
-### C. Frame Skipping
+### C. Bỏ Qua Frames
 
 ```python
 frame_counter = 0
@@ -448,30 +448,30 @@ while True:
     frame_counter += 1
 
     if frame_counter % process_every_n_frames == 0:
-        # Process this frame
+        # Xử lý frame này
         processed = process(frame)
     else:
-        # Use previous result
+        # Sử dụng kết quả trước đó
         pass
 
     cv2.imshow('Frame', frame)
 ```
 
-### D. Use Grayscale
+### D. Sử Dụng Ảnh Xám
 
 ```python
-# Convert to grayscale early
+# Chuyển sang ảnh xám sớm
 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-# Process grayscale (3x faster than color)
+# Xử lý ảnh xám (nhanh hơn 3 lần so với màu)
 processed = process_grayscale(gray)
 ```
 
 ---
 
-## 7. Useful Utilities
+## 7. Công Cụ Hữu Ích
 
-### A. FPS Counter
+### A. Bộ Đếm FPS
 
 ```python
 import time
@@ -493,7 +493,7 @@ class FPSCounter:
         self.start_time = time.time()
         self.frame_count = 0
 
-# Usage
+# Sử dụng
 fps_counter = FPSCounter()
 
 while True:
@@ -501,10 +501,10 @@ while True:
     if not ret:
         break
 
-    # Process frame
+    # Xử lý frame
     fps_counter.update()
 
-    # Display FPS
+    # Hiển thị FPS
     fps = fps_counter.get_fps()
     cv2.putText(frame, f"FPS: {fps:.1f}", (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
@@ -512,11 +512,11 @@ while True:
     cv2.imshow('Frame', frame)
 ```
 
-### B. Progress Bar
+### B. Thanh Tiến Trình
 
 ```python
 def process_video_with_progress(video_path):
-    """Process video with progress display"""
+    """Xử lý video với hiển thị tiến trình"""
     cap = cv2.VideoCapture(video_path)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
@@ -527,24 +527,24 @@ def process_video_with_progress(video_path):
         if not ret:
             break
 
-        # Process frame
+        # Xử lý frame
         processed = process(frame)
 
-        # Update progress
+        # Cập nhật tiến trình
         frame_number += 1
         progress = (frame_number / total_frames) * 100
 
-        print(f"\rProgress: {progress:.1f}% ({frame_number}/{total_frames})", end='')
+        print(f"\rTiến trình: {progress:.1f}% ({frame_number}/{total_frames})", end='')
 
-    print("\nDone!")
+    print("\nHoàn thành!")
     cap.release()
 ```
 
-### C. Auto-restart on Error
+### C. Tự Động Khởi Động Lại Khi Lỗi
 
 ```python
 def robust_capture(source):
-    """Robust video capture with auto-restart"""
+    """Video capture mạnh mẽ với tự động khởi động lại"""
     max_retries = 3
     retry_count = 0
 
@@ -552,7 +552,7 @@ def robust_capture(source):
         cap = cv2.VideoCapture(source)
 
         if not cap.isOpened():
-            print(f"Failed to open. Retry {retry_count + 1}/{max_retries}")
+            print(f"Không thể mở. Thử lại {retry_count + 1}/{max_retries}")
             retry_count += 1
             time.sleep(1)
             continue
@@ -561,37 +561,37 @@ def robust_capture(source):
             ret, frame = cap.read()
 
             if not ret:
-                print("Lost connection. Reconnecting...")
+                print("Mất kết nối. Đang kết nối lại...")
                 break
 
-            # Process frame
+            # Xử lý frame
             yield frame
 
         cap.release()
         retry_count += 1
 
-    print("Max retries reached. Exiting.")
+    print("Đã đạt số lần thử tối đa. Thoát.")
 ```
 
 ---
 
-## 8. Mouse Callbacks
+## 8. Mouse Callbacks (Xử Lý Sự Kiện Chuột)
 
-### A. Basic Callback
+### A. Callback Cơ Bản
 
 ```python
 def mouse_callback(event, x, y, flags, param):
-    """Handle mouse events"""
+    """Xử lý sự kiện chuột"""
     if event == cv2.EVENT_LBUTTONDOWN:
-        print(f"Left click at ({x}, {y})")
+        print(f"Click trái tại ({x}, {y})")
 
     elif event == cv2.EVENT_RBUTTONDOWN:
-        print(f"Right click at ({x}, {y})")
+        print(f"Click phải tại ({x}, {y})")
 
     elif event == cv2.EVENT_MOUSEMOVE:
-        print(f"Mouse moved to ({x}, {y})")
+        print(f"Chuột di chuyển đến ({x}, {y})")
 
-# Set callback
+# Đặt callback
 cv2.namedWindow('Window')
 cv2.setMouseCallback('Window', mouse_callback)
 
@@ -601,7 +601,7 @@ while True:
         break
 ```
 
-### B. Interactive ROI Selection
+### B. Chọn ROI Tương Tác
 
 ```python
 class ROISelector:
@@ -615,26 +615,26 @@ class ROISelector:
             self.drawing = True
 
         elif event == cv2.EVENT_RBUTTONDOWN:
-            # Finish ROI
+            # Hoàn thành ROI
             if len(self.points) >= 3:
-                print(f"ROI completed with {len(self.points)} points")
+                print(f"ROI hoàn thành với {len(self.points)} điểm")
                 self.drawing = False
 
     def draw_roi(self, frame):
-        """Draw current ROI on frame"""
+        """Vẽ ROI hiện tại lên frame"""
         if len(self.points) > 0:
-            # Draw points
+            # Vẽ điểm
             for point in self.points:
                 cv2.circle(frame, point, 5, (0, 255, 0), -1)
 
-            # Draw lines
+            # Vẽ đường thẳng
             if len(self.points) > 1:
                 pts = np.array(self.points, np.int32)
                 cv2.polylines(frame, [pts], False, (0, 255, 0), 2)
 
         return frame
 
-# Usage
+# Sử dụng
 selector = ROISelector()
 cv2.namedWindow('Select ROI')
 cv2.setMouseCallback('Select ROI', selector.mouse_callback)
@@ -651,17 +651,17 @@ while True:
 
 ---
 
-## 9. Trackbars
+## 9. Trackbars (Thanh Trượt)
 
 ```python
 def nothing(x):
-    """Dummy callback for trackbars"""
+    """Dummy callback cho trackbars"""
     pass
 
-# Create window with trackbars
+# Tạo cửa sổ với trackbars
 cv2.namedWindow('Controls')
 
-# Add trackbars
+# Thêm trackbars
 cv2.createTrackbar('Threshold', 'Controls', 127, 255, nothing)
 cv2.createTrackbar('Blur', 'Controls', 5, 50, nothing)
 
@@ -670,15 +670,15 @@ while True:
     if not ret:
         break
 
-    # Get trackbar values
+    # Lấy giá trị trackbar
     threshold_value = cv2.getTrackbarPos('Threshold', 'Controls')
     blur_value = cv2.getTrackbarPos('Blur', 'Controls')
 
-    # Make blur value odd
+    # Làm cho blur value là số lẻ
     if blur_value % 2 == 0:
         blur_value += 1
 
-    # Apply processing
+    # Áp dụng xử lý
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (blur_value, blur_value), 0)
     _, binary = cv2.threshold(blurred, threshold_value, 255, cv2.THRESH_BINARY)
@@ -692,32 +692,32 @@ while True:
 
 ---
 
-## 10. Common Patterns
+## 10. Mẫu Thông Dụng
 
-### A. Video Processing Template
+### A. Template Xử Lý Video
 
 ```python
 def process_video(input_path, output_path=None):
-    """Standard video processing template"""
-    # Open video
+    """Template tiêu chuẩn cho xử lý video"""
+    # Mở video
     cap = cv2.VideoCapture(input_path)
 
     if not cap.isOpened():
-        print("Error opening video")
+        print("Lỗi khi mở video")
         return
 
-    # Get properties
+    # Lấy thuộc tính
     fps = cap.get(cv2.CAP_PROP_FPS)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-    # Create writer if saving
+    # Tạo writer nếu lưu
     out = None
     if output_path:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
-    # Process loop
+    # Vòng lặp xử lý
     frame_count = 0
 
     try:
@@ -728,57 +728,57 @@ def process_video(input_path, output_path=None):
 
             frame_count += 1
 
-            # **YOUR PROCESSING HERE**
+            # **XỬ LÝ CỦA BẠN Ở ĐÂY**
             processed_frame = your_processing_function(frame)
 
-            # Save if writer exists
+            # Lưu nếu writer tồn tại
             if out:
                 out.write(processed_frame)
 
-            # Display
+            # Hiển thị
             cv2.imshow('Processing', processed_frame)
 
-            # Exit on 'q'
+            # Thoát khi nhấn 'q'
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
     except KeyboardInterrupt:
-        print("\nInterrupted by user")
+        print("\nBị gián đoạn bởi người dùng")
 
     finally:
-        # Cleanup
+        # Dọn dẹp
         cap.release()
         if out:
             out.release()
         cv2.destroyAllWindows()
 
-        print(f"Processed {frame_count} frames")
+        print(f"Đã xử lý {frame_count} frames")
 ```
 
-### B. Multi-window Display
+### B. Hiển Thị Nhiều Cửa Sổ
 
 ```python
 def show_multiple_views(frame, fg_mask, edges):
-    """Display multiple views in organized layout"""
-    # Resize for display
+    """Hiển thị nhiều view trong layout có tổ chức"""
+    # Resize để hiển thị
     h, w = 300, 400
 
     frame_resized = cv2.resize(frame, (w, h))
     mask_resized = cv2.resize(fg_mask, (w, h))
     edges_resized = cv2.resize(edges, (w, h))
 
-    # Convert grayscale to BGR for stacking
+    # Chuyển ảnh xám sang BGR để stack
     mask_bgr = cv2.cvtColor(mask_resized, cv2.COLOR_GRAY2BGR)
     edges_bgr = cv2.cvtColor(edges_resized, cv2.COLOR_GRAY2BGR)
 
-    # Stack horizontally
+    # Stack theo chiều ngang
     top_row = np.hstack([frame_resized, mask_bgr])
     bottom_row = np.hstack([edges_bgr, np.zeros((h, w, 3), dtype=np.uint8)])
 
-    # Stack vertically
+    # Stack theo chiều dọc
     combined = np.vstack([top_row, bottom_row])
 
-    # Add labels
+    # Thêm nhãn
     cv2.putText(combined, 'Original', (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     cv2.putText(combined, 'Foreground', (w + 10, 30),

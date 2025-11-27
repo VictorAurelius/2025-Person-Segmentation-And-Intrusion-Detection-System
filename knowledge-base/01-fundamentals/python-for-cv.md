@@ -1,129 +1,129 @@
-# Python for Computer Vision
+# Python for Computer Vision (Python Cho Thị Giác Máy Tính)
 
-## 1. NumPy cho Computer Vision
+## 1. NumPy Cho Computer Vision
 
-### A. Array Basics
+### A. Array Basics (Cơ Bản Về Mảng)
 
 ```python
 import numpy as np
 
-# Create image-like array
+# Tạo mảng giống ảnh
 image = np.zeros((480, 640, 3), dtype=np.uint8)
 print(f"Shape: {image.shape}")  # (height, width, channels)
 
-# Fill with value
+# Tô đầy bằng giá trị
 white_image = np.ones((100, 100, 3), dtype=np.uint8) * 255
 
-# Create gradient
+# Tạo gradient (dải màu)
 gradient = np.linspace(0, 255, 256, dtype=np.uint8)
 gradient_image = np.tile(gradient, (256, 1))
 ```
 
-### B. Array Operations
+### B. Array Operations (Thao Tác Mảng)
 
 ```python
-# Element-wise operations
+# Thao tác theo từng phần tử
 image1 = np.random.randint(0, 256, (100, 100, 3), dtype=np.uint8)
 image2 = np.random.randint(0, 256, (100, 100, 3), dtype=np.uint8)
 
-# Addition (với clipping)
+# Cộng (với clipping)
 added = np.clip(image1.astype(np.int16) + image2.astype(np.int16), 0, 255).astype(np.uint8)
 
-# Subtraction
+# Trừ
 subtracted = np.clip(image1.astype(np.int16) - image2.astype(np.int16), 0, 255).astype(np.uint8)
 
-# Multiplication (scaling)
+# Nhân (scaling - điều chỉnh tỷ lệ)
 scaled = np.clip(image1 * 1.5, 0, 255).astype(np.uint8)
 
-# Blending
+# Blending (trộn ảnh)
 alpha = 0.5
 blended = np.clip(alpha * image1 + (1 - alpha) * image2, 0, 255).astype(np.uint8)
 ```
 
-### C. Indexing and Slicing
+### C. Indexing and Slicing (Đánh Chỉ Số và Cắt Lát)
 
 ```python
-# Access pixel (y, x)
-pixel = image[100, 200]  # Returns [B, G, R]
+# Truy cập pixel (y, x)
+pixel = image[100, 200]  # Trả về [B, G, R]
 
-# Access channel
+# Truy cập kênh
 blue_channel = image[:, :, 0]
 green_channel = image[:, :, 1]
 red_channel = image[:, :, 2]
 
-# ROI (Region of Interest)
+# ROI (Region of Interest - Vùng quan tâm)
 roi = image[100:200, 150:250]  # [y1:y2, x1:x2]
 
-# Set ROI to value
-image[100:200, 150:250] = [255, 0, 0]  # Blue rectangle
+# Đặt ROI thành giá trị
+image[100:200, 150:250] = [255, 0, 0]  # Hình chữ nhật xanh dương
 
-# Copy ROI
+# Sao chép ROI
 roi_copy = image[100:200, 150:250].copy()
 
-# Boolean indexing
-bright_pixels = image[image > 200] = 255  # Set bright pixels to white
+# Boolean indexing (đánh chỉ số boolean)
+bright_pixels = image[image > 200] = 255  # Đặt pixels sáng thành trắng
 ```
 
-### D. Useful Functions
+### D. Hàm Hữu Ích
 
 ```python
-# Statistics
+# Thống kê
 mean = np.mean(image)
 std = np.std(image)
 min_val = np.min(image)
 max_val = np.max(image)
 
-# Per-channel statistics
+# Thống kê theo từng kênh
 channel_means = np.mean(image, axis=(0, 1))  # [B_mean, G_mean, R_mean]
 
-# Histogram
+# Histogram (biểu đồ)
 hist, bins = np.histogram(image.ravel(), bins=256, range=[0, 256])
 
-# Find indices
+# Tìm chỉ số
 bright_indices = np.where(image > 200)
 
-# Unique values
+# Giá trị duy nhất
 unique_values = np.unique(image)
 
-# Count non-zero
+# Đếm giá trị khác không
 non_zero_count = np.count_nonzero(image)
 ```
 
-### E. Array Manipulation
+### E. Thao Tác Mảng
 
 ```python
-# Reshape
+# Reshape (thay đổi hình dạng)
 flattened = image.reshape(-1, 3)  # (height*width, 3)
 
-# Transpose axes
-transposed = np.transpose(image, (2, 0, 1))  # (C, H, W) for PyTorch
+# Transpose axes (hoán vị trục)
+transposed = np.transpose(image, (2, 0, 1))  # (C, H, W) cho PyTorch
 
-# Flip
+# Flip (lật)
 flipped_vertical = np.flip(image, axis=0)
 flipped_horizontal = np.flip(image, axis=1)
 
-# Rotate 90 degrees
+# Xoay 90 độ
 rotated = np.rot90(image)
 
-# Stack images
-stacked_h = np.hstack([image1, image2])  # Horizontal
-stacked_v = np.vstack([image1, image2])  # Vertical
+# Stack images (ghép ảnh)
+stacked_h = np.hstack([image1, image2])  # Theo chiều ngang
+stacked_v = np.vstack([image1, image2])  # Theo chiều dọc
 
-# Split channels
+# Split channels (tách kênh)
 b, g, r = np.split(image, 3, axis=2)
 
-# Concatenate
+# Concatenate (nối)
 combined = np.concatenate([image1, image2], axis=1)
 ```
 
 ---
 
-## 2. Vectorization Techniques
+## 2. Vectorization Techniques (Kỹ Thuật Vector Hóa)
 
-### A. Avoid Loops
+### A. Tránh Vòng Lặp
 
 ```python
-# ❌ Slow: Using loops
+# ❌ Chậm: Sử dụng vòng lặp
 def brighten_slow(image, value):
     result = image.copy()
     for i in range(image.shape[0]):
@@ -131,73 +131,73 @@ def brighten_slow(image, value):
             result[i, j] = min(255, image[i, j] + value)
     return result
 
-# ✅ Fast: Vectorized
+# ✅ Nhanh: Vector hóa
 def brighten_fast(image, value):
     return np.clip(image + value, 0, 255).astype(np.uint8)
 
-# Speed comparison
+# So sánh tốc độ
 import time
 
 image = np.random.randint(0, 256, (1080, 1920, 3), dtype=np.uint8)
 
 start = time.time()
 result_slow = brighten_slow(image, 50)
-print(f"Loop version: {time.time() - start:.3f}s")
+print(f"Phiên bản vòng lặp: {time.time() - start:.3f}s")
 
 start = time.time()
 result_fast = brighten_fast(image, 50)
-print(f"Vectorized: {time.time() - start:.3f}s")
+print(f"Vector hóa: {time.time() - start:.3f}s")
 
-# Vectorized is 100-1000x faster!
+# Vector hóa nhanh hơn 100-1000 lần!
 ```
 
-### B. Broadcasting
+### B. Broadcasting (Phát Sóng)
 
 ```python
-# Add different values to each channel
+# Thêm giá trị khác nhau cho mỗi kênh
 image = np.random.randint(0, 256, (100, 100, 3), dtype=np.uint8)
 
-# Adjustment per channel
+# Điều chỉnh theo từng kênh
 adjustment = np.array([10, 20, 30])  # [B, G, R]
 
-# Broadcasting automatically expands adjustment to (100, 100, 3)
+# Broadcasting tự động mở rộng adjustment thành (100, 100, 3)
 adjusted = np.clip(image + adjustment, 0, 255).astype(np.uint8)
 
-# Mask application
-mask = image[:, :, 0] > 127  # Boolean mask from blue channel
+# Áp dụng mask
+mask = image[:, :, 0] > 127  # Boolean mask từ kênh xanh dương
 
-# Apply mask to all channels using broadcasting
-image[mask] = [255, 0, 0]  # Set masked pixels to blue
+# Áp dụng mask lên tất cả kênh sử dụng broadcasting
+image[mask] = [255, 0, 0]  # Đặt pixels đã mask thành xanh dương
 ```
 
-### C. Efficient Filtering
+### C. Lọc Hiệu Quả
 
 ```python
-# Color range filtering (e.g., blue objects)
+# Lọc theo khoảng màu (ví dụ: vật thể màu xanh dương)
 lower_blue = np.array([100, 0, 0])
 upper_blue = np.array([255, 50, 50])
 
-# Vectorized comparison
+# So sánh vector hóa
 mask = np.all((image >= lower_blue) & (image <= upper_blue), axis=2)
 
-# Extract blue objects
+# Trích xuất vật thể màu xanh dương
 blue_objects = image.copy()
 blue_objects[~mask] = 0
 ```
 
 ---
 
-## 3. Data Structures for CV
+## 3. Cấu Trúc Dữ Liệu Cho CV
 
-### A. Collections
+### A. Collections (Bộ Sưu Tập)
 
 ```python
 from collections import defaultdict, deque
 
-# Track objects over time
+# Theo dõi vật thể theo thời gian
 object_tracking = defaultdict(dict)
 
-# Add tracking info
+# Thêm thông tin theo dõi
 object_tracking[object_id] = {
     'first_seen': time.time(),
     'last_seen': time.time(),
@@ -205,29 +205,29 @@ object_tracking[object_id] = {
     'roi': 'Area 1'
 }
 
-# Recent frames buffer
-frame_buffer = deque(maxlen=30)  # Keep last 30 frames
+# Buffer frames gần đây
+frame_buffer = deque(maxlen=30)  # Giữ 30 frames cuối cùng
 
 while True:
     ret, frame = cap.read()
     if ret:
         frame_buffer.append(frame)
 
-    # Access recent frames
+    # Truy cập frames gần đây
     if len(frame_buffer) >= 3:
         current_frame = frame_buffer[-1]
         prev_frame = frame_buffer[-2]
         prev_prev_frame = frame_buffer[-3]
 ```
 
-### B. Dataclasses for Configuration
+### B. Dataclasses Cho Cấu Hình
 
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class DetectionConfig:
-    """Configuration for motion detection"""
+    """Cấu hình cho phát hiện chuyển động"""
     method: str = "MOG2"
     threshold: int = 16
     history: int = 500
@@ -241,41 +241,41 @@ class DetectionConfig:
             'detect_shadows': self.detect_shadows
         }
 
-# Usage
+# Sử dụng
 config = DetectionConfig(method="KNN", threshold=400)
 print(config.method)  # "KNN"
 ```
 
-### C. Named Tuples
+### C. Named Tuples (Tuple Có Tên)
 
 ```python
 from collections import namedtuple
 
-# Detection result
+# Kết quả phát hiện
 Detection = namedtuple('Detection', ['bbox', 'confidence', 'class_id'])
 
-# Create detection
+# Tạo detection
 det = Detection(
     bbox=(100, 100, 50, 75),
     confidence=0.95,
     class_id=0
 )
 
-# Access by name
+# Truy cập theo tên
 x, y, w, h = det.bbox
 print(f"Confidence: {det.confidence}")
 ```
 
 ---
 
-## 4. File I/O
+## 4. File I/O (Đọc/Ghi File)
 
-### A. JSON for Configuration
+### A. JSON Cho Cấu Hình
 
 ```python
 import json
 
-# Save configuration
+# Lưu cấu hình
 config = {
     'video': {
         'source': 'video.mp4',
@@ -296,60 +296,60 @@ config = {
 with open('config.json', 'w') as f:
     json.dump(config, f, indent=2)
 
-# Load configuration
+# Tải cấu hình
 with open('config.json', 'r') as f:
     loaded_config = json.load(f)
 
 print(loaded_config['motion']['method'])
 ```
 
-### B. YAML (Recommended)
+### B. YAML (Được Khuyên Dùng)
 
 ```python
 import yaml
 
-# Save
+# Lưu
 with open('config.yaml', 'w') as f:
     yaml.dump(config, f, default_flow_style=False)
 
-# Load
+# Tải
 with open('config.yaml', 'r') as f:
     loaded_config = yaml.safe_load(f)
 ```
 
-### C. Pickle for Objects
+### C. Pickle Cho Objects
 
 ```python
 import pickle
 
-# Save complex object
+# Lưu đối tượng phức tạp
 bg_subtractor = cv2.createBackgroundSubtractorMOG2()
 
-# Train it...
+# Huấn luyện nó...
 for frame in training_frames:
     bg_subtractor.apply(frame)
 
-# Save trained model (not all OpenCV objects support pickle!)
+# Lưu mô hình đã huấn luyện (không phải tất cả đối tượng OpenCV đều hỗ trợ pickle!)
 with open('bg_model.pkl', 'wb') as f:
     pickle.dump(bg_subtractor, f)
 
-# Load
+# Tải
 with open('bg_model.pkl', 'rb') as f:
     loaded_model = pickle.load(f)
 ```
 
-### D. CSV for Logs
+### D. CSV Cho Logs
 
 ```python
 import csv
 from datetime import datetime
 
-# Write detection log
+# Ghi log phát hiện
 with open('detections.csv', 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerow(['Timestamp', 'ROI', 'X', 'Y', 'Width', 'Height'])
 
-    # Write detections
+    # Ghi detections
     for detection in detections:
         writer.writerow([
             datetime.now().isoformat(),
@@ -360,7 +360,7 @@ with open('detections.csv', 'w', newline='') as f:
             detection['h']
         ])
 
-# Read log
+# Đọc log
 detections = []
 with open('detections.csv', 'r') as f:
     reader = csv.DictReader(f)
@@ -370,53 +370,53 @@ with open('detections.csv', 'r') as f:
 
 ---
 
-## 5. Multiprocessing
+## 5. Multiprocessing (Đa Xử Lý)
 
-### A. Process Pool
+### A. Process Pool (Nhóm Tiến Trình)
 
 ```python
 from multiprocessing import Pool
 import cv2
 
 def process_frame(args):
-    """Process single frame"""
+    """Xử lý frame đơn lẻ"""
     frame_path, output_path = args
 
-    # Read
+    # Đọc
     frame = cv2.imread(frame_path)
 
-    # Process
+    # Xử lý
     processed = your_processing_function(frame)
 
-    # Save
+    # Lưu
     cv2.imwrite(output_path, processed)
 
     return output_path
 
-# Prepare arguments
+# Chuẩn bị tham số
 frame_paths = [f'frame_{i:04d}.jpg' for i in range(100)]
 output_paths = [f'processed_{i:04d}.jpg' for i in range(100)]
 args_list = list(zip(frame_paths, output_paths))
 
-# Process in parallel
+# Xử lý song song
 with Pool(processes=4) as pool:
     results = pool.map(process_frame, args_list)
 
-print(f"Processed {len(results)} frames")
+print(f"Đã xử lý {len(results)} frames")
 ```
 
-### B. Threading for I/O
+### B. Threading Cho I/O
 
 ```python
 import threading
 import queue
 
-# Frame queue
+# Frame queue (hàng đợi frame)
 frame_queue = queue.Queue(maxsize=30)
 result_queue = queue.Queue()
 
 def capture_thread(source):
-    """Capture frames in separate thread"""
+    """Chụp frames trong thread riêng"""
     cap = cv2.VideoCapture(source)
 
     while cap.isOpened():
@@ -424,83 +424,83 @@ def capture_thread(source):
         if not ret:
             break
 
-        # Put frame in queue
+        # Đặt frame vào queue
         frame_queue.put(frame)
 
     cap.release()
-    frame_queue.put(None)  # Signal end
+    frame_queue.put(None)  # Tín hiệu kết thúc
 
 def processing_thread():
-    """Process frames from queue"""
+    """Xử lý frames từ queue"""
     while True:
         frame = frame_queue.get()
 
         if frame is None:
             break
 
-        # Process
+        # Xử lý
         processed = your_processing_function(frame)
 
-        # Put result
+        # Đặt kết quả
         result_queue.put(processed)
 
     result_queue.put(None)
 
-# Start threads
+# Khởi động threads
 capture = threading.Thread(target=capture_thread, args=('video.mp4',))
 processing = threading.Thread(target=processing_thread)
 
 capture.start()
 processing.start()
 
-# Consume results
+# Tiêu thụ kết quả
 while True:
     result = result_queue.get()
     if result is None:
         break
 
-    # Display or save result
+    # Hiển thị hoặc lưu kết quả
     cv2.imshow('Result', result)
     cv2.waitKey(1)
 
-# Wait for threads
+# Đợi threads
 capture.join()
 processing.join()
 ```
 
 ---
 
-## 6. Error Handling
+## 6. Xử Lý Lỗi
 
-### A. Robust Frame Reading
+### A. Đọc Frame An Toàn
 
 ```python
 def safe_read_frame(cap, max_retries=3):
-    """Safely read frame with retries"""
+    """Đọc frame an toàn với thử lại"""
     for attempt in range(max_retries):
         ret, frame = cap.read()
 
         if ret:
             return frame
 
-        print(f"Read failed, attempt {attempt + 1}/{max_retries}")
+        print(f"Đọc thất bại, lần thử {attempt + 1}/{max_retries}")
         time.sleep(0.1)
 
-    raise RuntimeError("Failed to read frame after retries")
+    raise RuntimeError("Không thể đọc frame sau khi thử lại")
 
-# Usage
+# Sử dụng
 try:
     frame = safe_read_frame(cap)
 except RuntimeError as e:
-    print(f"Error: {e}")
-    # Handle error (restart capture, etc.)
+    print(f"Lỗi: {e}")
+    # Xử lý lỗi (khởi động lại capture, v.v.)
 ```
 
-### B. Context Managers
+### B. Context Managers (Trình Quản Lý Ngữ Cảnh)
 
 ```python
 class VideoCapture:
-    """Context manager for video capture"""
+    """Context manager cho video capture"""
 
     def __init__(self, source):
         self.source = source
@@ -509,7 +509,7 @@ class VideoCapture:
     def __enter__(self):
         self.cap = cv2.VideoCapture(self.source)
         if not self.cap.isOpened():
-            raise RuntimeError(f"Cannot open: {self.source}")
+            raise RuntimeError(f"Không thể mở: {self.source}")
         return self.cap
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -517,7 +517,7 @@ class VideoCapture:
             self.cap.release()
         cv2.destroyAllWindows()
 
-# Usage
+# Sử dụng
 try:
     with VideoCapture('video.mp4') as cap:
         while True:
@@ -525,54 +525,54 @@ try:
             if not ret:
                 break
 
-            # Process frame
+            # Xử lý frame
             cv2.imshow('Frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
 except RuntimeError as e:
-    print(f"Error: {e}")
+    print(f"Lỗi: {e}")
 
-# Cleanup automatic!
+# Dọn dẹp tự động!
 ```
 
-### C. Validation
+### C. Validation (Kiểm Tra Tính Hợp Lệ)
 
 ```python
 def validate_frame(frame):
-    """Validate frame integrity"""
+    """Kiểm tra tính toàn vẹn của frame"""
     if frame is None:
-        raise ValueError("Frame is None")
+        raise ValueError("Frame là None")
 
     if frame.size == 0:
-        raise ValueError("Frame is empty")
+        raise ValueError("Frame rỗng")
 
     if len(frame.shape) not in [2, 3]:
-        raise ValueError(f"Invalid frame shape: {frame.shape}")
+        raise ValueError(f"Shape frame không hợp lệ: {frame.shape}")
 
     if frame.dtype != np.uint8:
-        raise ValueError(f"Invalid dtype: {frame.dtype}")
+        raise ValueError(f"Dtype không hợp lệ: {frame.dtype}")
 
     return True
 
-# Usage
+# Sử dụng
 try:
     validate_frame(frame)
-    # Process frame
+    # Xử lý frame
 except ValueError as e:
-    print(f"Invalid frame: {e}")
+    print(f"Frame không hợp lệ: {e}")
 ```
 
 ---
 
-## 7. Logging
+## 7. Logging (Ghi Log)
 
-### A. Basic Logging
+### A. Logging Cơ Bản
 
 ```python
 import logging
 
-# Configure logging
+# Cấu hình logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -584,22 +584,22 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-# Usage
-logger.info("Processing started")
-logger.warning("Low FPS detected: 12 FPS")
-logger.error("Failed to read frame")
+# Sử dụng
+logger.info("Bắt đầu xử lý")
+logger.warning("Phát hiện FPS thấp: 12 FPS")
+logger.error("Không thể đọc frame")
 
 try:
     result = risky_operation()
 except Exception as e:
-    logger.exception("Exception occurred")
+    logger.exception("Có exception xảy ra")
 ```
 
-### B. Custom Logger
+### B. Custom Logger (Logger Tùy Chỉnh)
 
 ```python
 class DetectionLogger:
-    """Custom logger for detections"""
+    """Logger tùy chỉnh cho detections"""
 
     def __init__(self, log_file='detections.log'):
         self.logger = logging.getLogger('DetectionLogger')
@@ -619,19 +619,19 @@ class DetectionLogger:
         self.logger.addHandler(fh)
 
     def log_detection(self, roi_name, bbox, confidence):
-        """Log detection event"""
+        """Ghi log sự kiện phát hiện"""
         self.logger.info(
             f"DETECTION | ROI: {roi_name} | "
             f"BBox: {bbox} | Confidence: {confidence:.2f}"
         )
 
     def log_intrusion(self, roi_name, duration):
-        """Log intrusion event"""
+        """Ghi log sự kiện xâm nhập"""
         self.logger.warning(
             f"INTRUSION | ROI: {roi_name} | Duration: {duration:.1f}s"
         )
 
-# Usage
+# Sử dụng
 det_logger = DetectionLogger()
 det_logger.log_detection('Entrance', (100, 100, 50, 75), 0.95)
 det_logger.log_intrusion('Entrance', 2.5)
@@ -639,47 +639,47 @@ det_logger.log_intrusion('Entrance', 2.5)
 
 ---
 
-## 8. Performance Profiling
+## 8. Performance Profiling (Đo Hiệu Suất)
 
-### A. Time Measurement
+### A. Đo Thời Gian
 
 ```python
 import time
 
 def profile_function(func):
-    """Decorator to profile function execution time"""
+    """Decorator để đo thời gian thực thi hàm"""
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        print(f"{func.__name__} took {(end - start) * 1000:.2f}ms")
+        print(f"{func.__name__} mất {(end - start) * 1000:.2f}ms")
         return result
     return wrapper
 
 @profile_function
 def process_frame(frame):
-    # Processing code
+    # Code xử lý
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     return blurred
 
-# Usage
+# Sử dụng
 result = process_frame(frame)
-# Output: process_frame took 12.34ms
+# Output: process_frame mất 12.34ms
 ```
 
-### B. Code Profiler
+### B. Code Profiler (Trình Đo Hiệu Suất Code)
 
 ```python
 import cProfile
 import pstats
 
 def profile_code():
-    """Profile entire processing pipeline"""
+    """Đo hiệu suất toàn bộ pipeline xử lý"""
     profiler = cProfile.Profile()
     profiler.enable()
 
-    # Code to profile
+    # Code cần đo
     cap = cv2.VideoCapture('video.mp4')
     for _ in range(100):
         ret, frame = cap.read()
@@ -689,43 +689,43 @@ def profile_code():
 
     profiler.disable()
 
-    # Print stats
+    # In thống kê
     stats = pstats.Stats(profiler)
     stats.sort_stats('cumulative')
-    stats.print_stats(10)  # Top 10 functions
+    stats.print_stats(10)  # 10 hàm hàng đầu
 
-# Run profiling
+# Chạy profiling
 profile_code()
 ```
 
-### C. Memory Profiling
+### C. Đo Bộ Nhớ
 
 ```python
 import tracemalloc
 
-# Start tracing
+# Bắt đầu theo dõi
 tracemalloc.start()
 
-# Code to profile
+# Code cần đo
 frames = []
 for i in range(100):
     frame = np.random.randint(0, 256, (1080, 1920, 3), dtype=np.uint8)
     frames.append(frame)
 
-# Get memory usage
+# Lấy mức sử dụng bộ nhớ
 current, peak = tracemalloc.get_traced_memory()
-print(f"Current memory: {current / 1024 / 1024:.2f} MB")
-print(f"Peak memory: {peak / 1024 / 1024:.2f} MB")
+print(f"Bộ nhớ hiện tại: {current / 1024 / 1024:.2f} MB")
+print(f"Bộ nhớ đỉnh: {peak / 1024 / 1024:.2f} MB")
 
-# Stop tracing
+# Dừng theo dõi
 tracemalloc.stop()
 ```
 
 ---
 
-## 9. Best Practices
+## 9. Best Practices (Thực Hành Tốt)
 
-### A. Type Hints
+### A. Type Hints (Gợi Ý Kiểu)
 
 ```python
 from typing import Tuple, List, Optional
@@ -736,14 +736,14 @@ def process_frame(
     threshold: int = 127
 ) -> Tuple[np.ndarray, List[np.ndarray]]:
     """
-    Process frame and detect contours.
+    Xử lý frame và phát hiện contours.
 
     Args:
-        frame: Input BGR image
-        threshold: Binary threshold value
+        frame: Ảnh BGR đầu vào
+        threshold: Giá trị ngưỡng nhị phân
 
     Returns:
-        Tuple of (binary image, list of contours)
+        Tuple gồm (ảnh nhị phân, danh sách contours)
     """
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
@@ -752,7 +752,7 @@ def process_frame(
     return binary, contours
 ```
 
-### B. Documentation
+### B. Documentation (Tài Liệu)
 
 ```python
 def calculate_overlap(
@@ -761,37 +761,37 @@ def calculate_overlap(
     frame_shape: Tuple[int, int]
 ) -> float:
     """
-    Calculate overlap between contour and ROI.
+    Tính chồng lấn giữa contour và ROI.
 
-    This function creates binary masks for both the contour and ROI,
-    then calculates the intersection over contour area.
+    Hàm này tạo binary masks cho cả contour và ROI,
+    sau đó tính giao điểm trên diện tích contour.
 
     Args:
-        contour: OpenCV contour (Nx1x2 array)
-        roi: ROI polygon points (Nx2 array)
-        frame_shape: (height, width) of frame
+        contour: OpenCV contour (mảng Nx1x2)
+        roi: Điểm polygon ROI (mảng Nx2)
+        frame_shape: (height, width) của frame
 
     Returns:
-        Overlap ratio (0.0 to 1.0)
+        Tỷ lệ chồng lấn (0.0 đến 1.0)
 
     Example:
         >>> contour = np.array([[[100, 100]], [[200, 100]], [[200, 200]]])
         >>> roi = np.array([[50, 50], [250, 50], [250, 250], [50, 250]])
         >>> overlap = calculate_overlap(contour, roi, (480, 640))
-        >>> print(f"Overlap: {overlap:.2%}")
-        Overlap: 75.00%
+        >>> print(f"Chồng lấn: {overlap:.2%}")
+        Chồng lấn: 75.00%
     """
     h, w = frame_shape
 
-    # Create masks
+    # Tạo masks
     contour_mask = np.zeros((h, w), dtype=np.uint8)
     roi_mask = np.zeros((h, w), dtype=np.uint8)
 
-    # Fill masks
+    # Tô đầy masks
     cv2.drawContours(contour_mask, [contour], -1, 255, -1)
     cv2.fillPoly(roi_mask, [roi], 255)
 
-    # Calculate overlap
+    # Tính chồng lấn
     intersection = cv2.bitwise_and(contour_mask, roi_mask)
     intersection_area = cv2.countNonZero(intersection)
     contour_area = cv2.contourArea(contour)
@@ -802,29 +802,29 @@ def calculate_overlap(
         return 0.0
 ```
 
-### C. Configuration Management
+### C. Quản Lý Cấu Hình
 
 ```python
 from pathlib import Path
 import yaml
 
 class Config:
-    """Centralized configuration management"""
+    """Quản lý cấu hình tập trung"""
 
     def __init__(self, config_path: str = 'config.yaml'):
         self.config_path = Path(config_path)
         self.config = self.load()
 
     def load(self) -> dict:
-        """Load configuration from YAML"""
+        """Tải cấu hình từ YAML"""
         if not self.config_path.exists():
-            raise FileNotFoundError(f"Config not found: {self.config_path}")
+            raise FileNotFoundError(f"Không tìm thấy config: {self.config_path}")
 
         with open(self.config_path, 'r') as f:
             return yaml.safe_load(f)
 
     def get(self, key: str, default=None):
-        """Get configuration value"""
+        """Lấy giá trị cấu hình"""
         keys = key.split('.')
         value = self.config
 
@@ -836,11 +836,11 @@ class Config:
         return value
 
     def save(self):
-        """Save configuration"""
+        """Lưu cấu hình"""
         with open(self.config_path, 'w') as f:
             yaml.dump(self.config, f, default_flow_style=False)
 
-# Usage
+# Sử dụng
 config = Config('config.yaml')
 
 video_source = config.get('video.source')
@@ -850,9 +850,9 @@ threshold = config.get('motion.threshold', default=16)
 
 ---
 
-## 10. Testing
+## 10. Testing (Kiểm Thử)
 
-### A. Unit Tests
+### A. Unit Tests (Kiểm Thử Đơn Vị)
 
 ```python
 import unittest
@@ -860,27 +860,27 @@ import unittest
 class TestImageProcessing(unittest.TestCase):
 
     def setUp(self):
-        """Create test image"""
+        """Tạo ảnh test"""
         self.test_image = np.zeros((100, 100, 3), dtype=np.uint8)
 
     def test_grayscale_conversion(self):
-        """Test BGR to grayscale conversion"""
+        """Kiểm thử chuyển đổi BGR sang grayscale"""
         gray = cv2.cvtColor(self.test_image, cv2.COLOR_BGR2GRAY)
 
         self.assertEqual(gray.shape, (100, 100))
         self.assertEqual(gray.dtype, np.uint8)
 
     def test_threshold(self):
-        """Test thresholding"""
+        """Kiểm thử ngưỡng hóa"""
         gray = cv2.cvtColor(self.test_image, cv2.COLOR_BGR2GRAY)
         _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-        # All pixels should be 0 or 255
+        # Tất cả pixels phải là 0 hoặc 255
         unique_values = np.unique(binary)
         self.assertTrue(all(v in [0, 255] for v in unique_values))
 
     def tearDown(self):
-        """Cleanup"""
+        """Dọn dẹp"""
         del self.test_image
 
 if __name__ == '__main__':

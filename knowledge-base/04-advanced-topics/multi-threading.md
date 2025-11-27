@@ -1,27 +1,27 @@
-# Multi-threading and Parallel Processing
+# Multi-threading (Đa Luồng) và Parallel Processing (Xử Lý Song Song)
 
-## 1. Why Parallel Processing?
+## 1. Tại Sao Cần Xử Lý Song Song?
 
-### A. Benefits
+### A. Lợi Ích
 
-- **Faster Processing**: Utilize multiple CPU cores
-- **Better Responsiveness**: Separate I/O and processing
-- **Higher Throughput**: Process multiple frames simultaneously
+- **Xử Lý Nhanh Hơn**: Sử dụng nhiều lõi CPU
+- **Phản Hồi Tốt Hơn**: Tách biệt I/O và xử lý
+- **Throughput (Thông Lượng) Cao Hơn**: Xử lý nhiều frames đồng thời
 
 ### B. Python GIL (Global Interpreter Lock)
 
-**Challenge:** Python GIL prevents true parallel execution của Python bytecode.
+**Thách Thức:** Python GIL ngăn chặn việc thực thi song song thực sự của Python bytecode.
 
-**Solutions:**
-- **Threading**: Good for I/O-bound tasks (video capture, file I/O)
-- **Multiprocessing**: Good for CPU-bound tasks (image processing)
-- **NumPy/OpenCV**: Release GIL during C operations
+**Giải Pháp:**
+- **Threading (Đa luồng)**: Tốt cho I/O-bound tasks (video capture, file I/O)
+- **Multiprocessing (Đa tiến trình)**: Tốt cho CPU-bound tasks (image processing)
+- **NumPy/OpenCV**: Giải phóng GIL trong các thao tác C
 
 ---
 
-## 2. Threading for Video Capture
+## 2. Threading (Đa Luồng) Cho Video Capture
 
-### A. Basic Threaded Capture
+### A. Threaded Capture Cơ Bản
 
 ```python
 import threading
@@ -38,14 +38,14 @@ class VideoCapture:
         self.stopped = False
 
     def start(self):
-        """Start capture thread"""
+        """Khởi động capture thread"""
         t = threading.Thread(target=self._capture, args=())
         t.daemon = True
         t.start()
         return self
 
     def _capture(self):
-        """Capture loop"""
+        """Vòng lặp capture"""
         while not self.stopped:
             if not self.q.full():
                 ret, frame = self.cap.read()
@@ -56,26 +56,26 @@ class VideoCapture:
 
                 self.q.put(frame)
             else:
-                # Queue full, wait
+                # Queue đầy, đợi
                 threading.Event().wait(0.01)
 
     def read(self):
-        """Read frame from queue"""
+        """Đọc frame từ queue"""
         return self.q.get()
 
     def stop(self):
-        """Stop capture"""
+        """Dừng capture"""
         self.stopped = True
         self.cap.release()
 
 
-# Usage
+# Sử dụng
 cap = VideoCapture('video.mp4').start()
 
 while True:
     frame = cap.read()
 
-    # Process frame (no waiting for I/O!)
+    # Xử lý frame (không cần đợi I/O!)
     processed = process_frame(frame)
 
     cv2.imshow('Frame', processed)
@@ -87,12 +87,12 @@ cap.stop()
 cv2.destroyAllWindows()
 ```
 
-### B. FPS Improvement
+### B. Cải Thiện FPS
 
 ```python
 import time
 
-# Regular capture
+# Capture thông thường
 cap = cv2.VideoCapture('video.mp4')
 start = time.time()
 frames = 0
@@ -121,18 +121,18 @@ while frames < 300:
 threaded_fps = frames / (time.time() - start)
 cap.stop()
 
-print(f"Regular: {regular_fps:.1f} FPS")
+print(f"Thông thường: {regular_fps:.1f} FPS")
 print(f"Threaded: {threaded_fps:.1f} FPS")
-print(f"Improvement: {(threaded_fps / regular_fps - 1) * 100:.1f}%")
+print(f"Cải thiện: {(threaded_fps / regular_fps - 1) * 100:.1f}%")
 
-# Typical result: 20-40% improvement
+# Kết quả điển hình: cải thiện 20-40%
 ```
 
 ---
 
-## 3. Producer-Consumer Pattern
+## 3. Producer-Consumer Pattern (Mẫu Sản Xuất-Tiêu Thụ)
 
-### A. Complete Pipeline
+### A. Pipeline Hoàn Chỉnh
 
 ```python
 import threading
@@ -151,13 +151,13 @@ class VideoPipeline:
         self.processed_queue = queue.Queue(maxsize=buffer_size)
 
     def start(self):
-        """Start all threads"""
+        """Khởi động tất cả threads"""
         # Capture thread
         t1 = threading.Thread(target=self._capture)
         t1.daemon = True
         t1.start()
 
-        # Processing threads (multiple workers)
+        # Processing threads (nhiều workers)
         for _ in range(2):
             t = threading.Thread(target=self._process)
             t.daemon = True
@@ -176,40 +176,40 @@ class VideoPipeline:
                 self.stopped = True
                 break
 
-            # Put frame in queue (blocks if full)
+            # Đưa frame vào queue (chặn nếu đầy)
             self.frame_queue.put(frame)
 
         cap.release()
 
     def _process(self):
-        """Process frames"""
+        """Xử lý frames"""
         while not self.stopped:
             try:
-                # Get frame (with timeout)
+                # Lấy frame (với timeout)
                 frame = self.frame_queue.get(timeout=1)
 
-                # Process
+                # Xử lý
                 processed = process_frame(frame)
 
-                # Put result
+                # Đưa kết quả vào queue
                 self.processed_queue.put(processed)
 
             except queue.Empty:
                 continue
 
     def read(self):
-        """Read processed frame"""
+        """Đọc processed frame"""
         try:
             return self.processed_queue.get(timeout=1)
         except queue.Empty:
             return None
 
     def stop(self):
-        """Stop pipeline"""
+        """Dừng pipeline"""
         self.stopped = True
 
 
-# Usage
+# Sử dụng
 pipeline = VideoPipeline('video.mp4', buffer_size=128).start()
 
 while True:
@@ -229,7 +229,7 @@ cv2.destroyAllWindows()
 
 ---
 
-## 4. Multiprocessing for CPU-Bound Tasks
+## 4. Multiprocessing (Đa Tiến Trình) Cho CPU-Bound Tasks
 
 ### A. Process Pool
 
@@ -239,53 +239,53 @@ import cv2
 import glob
 
 def process_image(image_path):
-    """Process single image (CPU-intensive)"""
-    # Read
+    """Xử lý một ảnh (CPU-intensive)"""
+    # Đọc
     image = cv2.imread(image_path)
 
-    # Heavy processing
+    # Xử lý nặng
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     denoised = cv2.fastNlMeansDenoising(gray, h=10)
     _, binary = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    # Find contours
+    # Tìm contours
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Save result
+    # Lưu kết quả
     output_path = image_path.replace('input', 'output')
     cv2.imwrite(output_path, binary)
 
     return len(contours)
 
 
-# Get all images
+# Lấy tất cả ảnh
 image_paths = glob.glob('input/*.jpg')
 
-# Sequential processing
+# Xử lý tuần tự
 import time
 start = time.time()
 results = [process_image(path) for path in image_paths]
 sequential_time = time.time() - start
 
-# Parallel processing
+# Xử lý song song
 start = time.time()
 with Pool(processes=cpu_count()) as pool:
     results = pool.map(process_image, image_paths)
 parallel_time = time.time() - start
 
-print(f"Sequential: {sequential_time:.2f}s")
-print(f"Parallel: {parallel_time:.2f}s")
-print(f"Speedup: {sequential_time / parallel_time:.2f}x")
+print(f"Tuần tự: {sequential_time:.2f}s")
+print(f"Song song: {parallel_time:.2f}s")
+print(f"Tăng tốc: {sequential_time / parallel_time:.2f}x")
 ```
 
-### B. Video Processing with Multiprocessing
+### B. Xử Lý Video Với Multiprocessing
 
 ```python
 from multiprocessing import Process, Queue
 import cv2
 
 def capture_process(output_queue, src):
-    """Capture frames in separate process"""
+    """Capture frames trong process riêng"""
     cap = cv2.VideoCapture(src)
 
     while cap.isOpened():
@@ -300,7 +300,7 @@ def capture_process(output_queue, src):
 
 
 def processing_process(input_queue, output_queue):
-    """Process frames in separate process"""
+    """Xử lý frames trong process riêng"""
     while True:
         frame = input_queue.get()
 
@@ -308,14 +308,14 @@ def processing_process(input_queue, output_queue):
             output_queue.put(None)
             break
 
-        # Heavy processing
+        # Xử lý nặng
         processed = heavy_processing(frame)
 
         output_queue.put(processed)
 
 
 def display_process(input_queue):
-    """Display frames in separate process"""
+    """Hiển thị frames trong process riêng"""
     while True:
         frame = input_queue.get()
 
@@ -329,21 +329,21 @@ def display_process(input_queue):
     cv2.destroyAllWindows()
 
 
-# Create queues
+# Tạo queues
 capture_queue = Queue(maxsize=128)
 processed_queue = Queue(maxsize=128)
 
-# Create processes
+# Tạo processes
 p1 = Process(target=capture_process, args=(capture_queue, 'video.mp4'))
 p2 = Process(target=processing_process, args=(capture_queue, processed_queue))
 p3 = Process(target=display_process, args=(processed_queue,))
 
-# Start
+# Khởi động
 p1.start()
 p2.start()
 p3.start()
 
-# Wait
+# Đợi
 p1.join()
 p2.join()
 p3.join()
@@ -353,14 +353,14 @@ p3.join()
 
 ## 5. ThreadPoolExecutor
 
-### A. Elegant Threading
+### A. Threading Thanh Lịch
 
 ```python
 from concurrent.futures import ThreadPoolExecutor
 import cv2
 
 def process_batch(frames):
-    """Process batch of frames"""
+    """Xử lý batch frames"""
     results = []
 
     for frame in frames:
@@ -382,25 +382,25 @@ for _ in range(100):
 
 cap.release()
 
-# Split into batches
+# Chia thành batches
 batch_size = 10
 batches = [frames[i:i + batch_size] for i in range(0, len(frames), batch_size)]
 
-# Process in parallel
+# Xử lý song song
 with ThreadPoolExecutor(max_workers=4) as executor:
     results = list(executor.map(process_batch, batches))
 
-# Flatten results
+# Làm phẳng kết quả
 all_results = [r for batch in results for r in batch]
 
-print(f"Processed {len(all_results)} frames")
+print(f"Đã xử lý {len(all_results)} frames")
 ```
 
 ---
 
-## 6. Async Processing with asyncio
+## 6. Xử Lý Async Với asyncio
 
-### A. Async Video Processing
+### A. Xử Lý Video Async
 
 ```python
 import asyncio
@@ -408,45 +408,45 @@ import cv2
 from concurrent.futures import ProcessPoolExecutor
 
 async def async_process_frame(frame, executor):
-    """Process frame asynchronously"""
+    """Xử lý frame bất đồng bộ"""
     loop = asyncio.get_event_loop()
 
-    # Run in process pool
+    # Chạy trong process pool
     result = await loop.run_in_executor(executor, process_frame, frame)
 
     return result
 
 
 async def async_video_pipeline(video_path):
-    """Async video processing pipeline"""
+    """Pipeline xử lý video async"""
     cap = cv2.VideoCapture(video_path)
     executor = ProcessPoolExecutor(max_workers=4)
 
     tasks = []
 
-    # Read frames
+    # Đọc frames
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Create async task
+        # Tạo async task
         task = asyncio.create_task(async_process_frame(frame, executor))
         tasks.append(task)
 
-        # Limit concurrent tasks
+        # Giới hạn concurrent tasks
         if len(tasks) >= 10:
-            # Wait for some to complete
+            # Đợi một số hoàn thành
             done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
 
-            # Process completed
+            # Xử lý các task đã hoàn thành
             for task in done:
                 result = task.result()
-                # Display or save result
+                # Hiển thị hoặc lưu kết quả
 
             tasks = list(pending)
 
-    # Wait for remaining
+    # Đợi các tasks còn lại
     results = await asyncio.gather(*tasks)
 
     cap.release()
@@ -455,13 +455,13 @@ async def async_video_pipeline(video_path):
     return results
 
 
-# Run
+# Chạy
 results = asyncio.run(async_video_pipeline('video.mp4'))
 ```
 
 ---
 
-## 7. Lock and Synchronization
+## 7. Lock và Synchronization (Đồng Bộ Hóa)
 
 ### A. Thread-Safe Queue
 
@@ -469,26 +469,26 @@ results = asyncio.run(async_video_pipeline('video.mp4'))
 import threading
 
 class ThreadSafeQueue:
-    """Thread-safe queue with lock"""
+    """Queue an toàn luồng với lock"""
 
     def __init__(self):
         self.queue = []
         self.lock = threading.Lock()
 
     def put(self, item):
-        """Add item to queue"""
+        """Thêm item vào queue"""
         with self.lock:
             self.queue.append(item)
 
     def get(self):
-        """Get item from queue"""
+        """Lấy item từ queue"""
         with self.lock:
             if len(self.queue) > 0:
                 return self.queue.pop(0)
             return None
 
     def size(self):
-        """Get queue size"""
+        """Lấy kích thước queue"""
         with self.lock:
             return len(self.queue)
 ```
@@ -499,49 +499,49 @@ class ThreadSafeQueue:
 import threading
 
 class SharedCounter:
-    """Thread-safe counter"""
+    """Bộ đếm an toàn luồng"""
 
     def __init__(self):
         self.value = 0
         self.lock = threading.Lock()
 
     def increment(self):
-        """Increment counter"""
+        """Tăng bộ đếm"""
         with self.lock:
             self.value += 1
 
     def get(self):
-        """Get current value"""
+        """Lấy giá trị hiện tại"""
         with self.lock:
             return self.value
 
 
-# Usage
+# Sử dụng
 counter = SharedCounter()
 
 def worker():
     for _ in range(1000):
         counter.increment()
 
-# Start threads
+# Khởi động threads
 threads = []
 for _ in range(10):
     t = threading.Thread(target=worker)
     t.start()
     threads.append(t)
 
-# Wait
+# Đợi
 for t in threads:
     t.join()
 
-print(f"Final count: {counter.get()}")  # Should be 10000
+print(f"Kết quả cuối: {counter.get()}")  # Phải là 10000
 ```
 
 ---
 
-## 8. Real-World Example
+## 8. Ví Dụ Thực Tế
 
-### A. Complete Multi-Threaded System
+### A. Hệ Thống Multi-Threaded Hoàn Chỉnh
 
 ```python
 import threading
@@ -550,7 +550,7 @@ import cv2
 import time
 
 class MultiThreadedVideoProcessor:
-    """Complete multi-threaded video processing system"""
+    """Hệ thống xử lý video multi-threaded hoàn chỉnh"""
 
     def __init__(self, video_source, num_workers=2):
         self.video_source = video_source
@@ -560,10 +560,10 @@ class MultiThreadedVideoProcessor:
         self.frame_queue = queue.Queue(maxsize=128)
         self.result_queue = queue.Queue(maxsize=128)
 
-        # Control
+        # Điều khiển
         self.stopped = False
 
-        # Statistics
+        # Thống kê
         self.frames_captured = 0
         self.frames_processed = 0
         self.start_time = None
@@ -572,7 +572,7 @@ class MultiThreadedVideoProcessor:
         self.lock = threading.Lock()
 
     def start(self):
-        """Start all threads"""
+        """Khởi động tất cả threads"""
         self.start_time = time.time()
 
         # Capture thread
@@ -590,7 +590,7 @@ class MultiThreadedVideoProcessor:
 
     def _capture_thread(self):
         """Capture frames"""
-        print("[INFO] Starting capture thread")
+        print("[INFO] Đang khởi động capture thread")
         cap = cv2.VideoCapture(self.video_source)
 
         while not self.stopped and cap.isOpened():
@@ -600,28 +600,28 @@ class MultiThreadedVideoProcessor:
                 self.stopped = True
                 break
 
-            # Put frame
+            # Đưa frame vào queue
             self.frame_queue.put(frame)
 
             with self.lock:
                 self.frames_captured += 1
 
         cap.release()
-        print("[INFO] Capture thread stopped")
+        print("[INFO] Capture thread đã dừng")
 
     def _worker_thread(self, worker_id):
-        """Process frames"""
-        print(f"[INFO] Starting worker {worker_id}")
+        """Xử lý frames"""
+        print(f"[INFO] Đang khởi động worker {worker_id}")
 
         while not self.stopped:
             try:
-                # Get frame
+                # Lấy frame
                 frame = self.frame_queue.get(timeout=1)
 
-                # Process
+                # Xử lý
                 result = self._process_frame(frame)
 
-                # Put result
+                # Đưa kết quả vào queue
                 self.result_queue.put(result)
 
                 with self.lock:
@@ -630,11 +630,11 @@ class MultiThreadedVideoProcessor:
             except queue.Empty:
                 continue
 
-        print(f"[INFO] Worker {worker_id} stopped")
+        print(f"[INFO] Worker {worker_id} đã dừng")
 
     def _process_frame(self, frame):
-        """Process single frame"""
-        # Heavy processing
+        """Xử lý một frame"""
+        # Xử lý nặng
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         edges = cv2.Canny(blurred, 50, 150)
@@ -642,14 +642,14 @@ class MultiThreadedVideoProcessor:
         return edges
 
     def read(self):
-        """Read processed frame"""
+        """Đọc processed frame"""
         try:
             return self.result_queue.get(timeout=1)
         except queue.Empty:
             return None
 
     def get_stats(self):
-        """Get processing statistics"""
+        """Lấy thống kê xử lý"""
         with self.lock:
             elapsed = time.time() - self.start_time
             capture_fps = self.frames_captured / elapsed if elapsed > 0 else 0
@@ -665,11 +665,11 @@ class MultiThreadedVideoProcessor:
             }
 
     def stop(self):
-        """Stop processing"""
+        """Dừng xử lý"""
         self.stopped = True
 
 
-# Usage
+# Sử dụng
 processor = MultiThreadedVideoProcessor('video.mp4', num_workers=4).start()
 
 frame_count = 0
@@ -684,10 +684,10 @@ while True:
 
     frame_count += 1
 
-    # Display
+    # Hiển thị
     cv2.imshow('Result', frame)
 
-    # Print stats every 30 frames
+    # In thống kê mỗi 30 frames
     if frame_count % 30 == 0:
         stats = processor.get_stats()
         print(f"[STATS] Captured: {stats['captured']}, "
@@ -701,50 +701,50 @@ while True:
 processor.stop()
 cv2.destroyAllWindows()
 
-# Final stats
+# Thống kê cuối
 final_stats = processor.get_stats()
-print("\n[FINAL STATS]")
-print(f"Total Captured: {final_stats['captured']}")
-print(f"Total Processed: {final_stats['processed']}")
-print(f"Average Capture FPS: {final_stats['capture_fps']:.1f}")
-print(f"Average Process FPS: {final_stats['process_fps']:.1f}")
+print("\n[THỐNG KÊ CUỐI]")
+print(f"Tổng số Captured: {final_stats['captured']}")
+print(f"Tổng số Processed: {final_stats['processed']}")
+print(f"Capture FPS trung bình: {final_stats['capture_fps']:.1f}")
+print(f"Process FPS trung bình: {final_stats['process_fps']:.1f}")
 ```
 
 ---
 
-## 9. Best Practices
+## 9. Best Practices (Thực Hành Tốt)
 
-### A. Thread Count
+### A. Số Lượng Threads
 
 ```python
 import os
 
-# Rule of thumb
-num_io_threads = 2  # For I/O (capture, display)
-num_cpu_threads = os.cpu_count()  # For CPU-bound (processing)
+# Quy tắc chung
+num_io_threads = 2  # Cho I/O (capture, display)
+num_cpu_threads = os.cpu_count()  # Cho CPU-bound (processing)
 
-# Don't exceed
+# Không vượt quá
 max_threads = os.cpu_count() * 2
 ```
 
-### B. Queue Size
+### B. Kích Thước Queue
 
 ```python
-# Too small: Threads wait frequently
-queue_size = 10  # ❌ Too small
+# Quá nhỏ: Threads đợi thường xuyên
+queue_size = 10  # Quá nhỏ
 
-# Too large: Memory usage
-queue_size = 10000  # ❌ Too large
+# Quá lớn: Sử dụng bộ nhớ
+queue_size = 10000  # Quá lớn
 
-# Good balance
-queue_size = 128  # ✅ Good for most cases
+# Cân bằng tốt
+queue_size = 128  # Tốt cho hầu hết trường hợp
 ```
 
-### C. Error Handling
+### C. Xử Lý Lỗi
 
 ```python
 def safe_worker():
-    """Worker with error handling"""
+    """Worker với xử lý lỗi"""
     while not stopped:
         try:
             frame = frame_queue.get(timeout=1)
@@ -755,13 +755,13 @@ def safe_worker():
             continue
 
         except Exception as e:
-            print(f"[ERROR] Worker exception: {e}")
-            # Log error, continue or stop
+            print(f"[LỖI] Ngoại lệ Worker: {e}")
+            # Ghi log lỗi, tiếp tục hoặc dừng
 ```
 
 ---
 
-## 10. Performance Monitoring
+## 10. Giám Sát Hiệu Năng
 
 ### A. Profiling
 
@@ -774,7 +774,7 @@ def profile_pipeline():
     profiler = cProfile.Profile()
     profiler.enable()
 
-    # Run pipeline
+    # Chạy pipeline
     processor = MultiThreadedVideoProcessor('video.mp4').start()
 
     for _ in range(300):
@@ -786,7 +786,7 @@ def profile_pipeline():
 
     profiler.disable()
 
-    # Print stats
+    # In thống kê
     stats = pstats.Stats(profiler)
     stats.sort_stats('cumulative')
     stats.print_stats(20)

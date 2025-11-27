@@ -1,76 +1,76 @@
-# Thresholding Techniques
+# Thresholding Techniques (Kỹ Thuật Ngưỡng Hóa)
 
 ## 1. Khái Niệm
 
-**Thresholding** là kỹ thuật segmentation đơn giản nhất, phân chia image thành foreground và background dựa trên pixel intensity.
+**Thresholding (ngưỡng hóa)** là kỹ thuật phân vùng đơn giản nhất, phân chia ảnh thành nền trước và nền sau dựa trên cường độ sáng pixel.
 
-### A. Basic Principle
+### A. Nguyên Tắc Cơ Bản
 
 ```python
 if pixel_value > threshold:
-    output = 255  # Foreground (white)
+    output = 255  # Nền trước (trắng)
 else:
-    output = 0    # Background (black)
+    output = 0    # Nền sau (đen)
 ```
 
 ---
 
-## 2. Global Thresholding
+## 2. Global Thresholding (Ngưỡng Hóa Toàn Cục)
 
-### A. Binary Threshold
+### A. Binary Threshold (Ngưỡng Nhị Phân)
 
 ```python
 import cv2
 import numpy as np
 
-# Load image
+# Tải ảnh
 image = cv2.imread('image.jpg', cv2.IMREAD_GRAYSCALE)
 
-# Apply binary threshold
+# Áp dụng ngưỡng nhị phân
 threshold_value = 127
 _, binary = cv2.threshold(image, threshold_value, 255, cv2.THRESH_BINARY)
 
-cv2.imshow('Original', image)
-cv2.imshow('Binary', binary)
+cv2.imshow('Gốc', image)
+cv2.imshow('Nhị phân', binary)
 cv2.waitKey(0)
 ```
 
-**Threshold Types:**
+**Các Loại Ngưỡng:**
 
 ```python
-# THRESH_BINARY: > threshold → 255, else → 0
+# THRESH_BINARY: > ngưỡng → 255, ngược lại → 0
 _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-# THRESH_BINARY_INV: > threshold → 0, else → 255
+# THRESH_BINARY_INV: > ngưỡng → 0, ngược lại → 255
 _, binary_inv = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
 
-# THRESH_TRUNC: > threshold → threshold, else → same
+# THRESH_TRUNC: > ngưỡng → ngưỡng, ngược lại → giữ nguyên
 _, trunc = cv2.threshold(gray, 127, 255, cv2.THRESH_TRUNC)
 
-# THRESH_TOZERO: > threshold → same, else → 0
+# THRESH_TOZERO: > ngưỡng → giữ nguyên, ngược lại → 0
 _, tozero = cv2.threshold(gray, 127, 255, cv2.THRESH_TOZERO)
 
-# THRESH_TOZERO_INV: > threshold → 0, else → same
+# THRESH_TOZERO_INV: > ngưỡng → 0, ngược lại → giữ nguyên
 _, tozero_inv = cv2.threshold(gray, 127, 255, cv2.THRESH_TOZERO_INV)
 ```
 
-### B. Với Trackbar (Interactive)
+### B. Với Trackbar (Tương Tác)
 
 ```python
 def nothing(x):
     pass
 
-cv2.namedWindow('Threshold')
-cv2.createTrackbar('Threshold', 'Threshold', 127, 255, nothing)
+cv2.namedWindow('Ngưỡng')
+cv2.createTrackbar('Ngưỡng', 'Ngưỡng', 127, 255, nothing)
 
 while True:
-    # Get trackbar position
-    threshold_value = cv2.getTrackbarPos('Threshold', 'Threshold')
+    # Lấy vị trí trackbar
+    threshold_value = cv2.getTrackbarPos('Ngưỡng', 'Ngưỡng')
 
-    # Apply threshold
+    # Áp dụng ngưỡng
     _, binary = cv2.threshold(image, threshold_value, 255, cv2.THRESH_BINARY)
 
-    cv2.imshow('Threshold', binary)
+    cv2.imshow('Ngưỡng', binary)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -80,28 +80,28 @@ cv2.destroyAllWindows()
 
 ---
 
-## 3. Otsu's Thresholding
+## 3. Otsu's Thresholding (Ngưỡng Otsu)
 
-### A. Automatic Threshold Selection
+### A. Tự Động Chọn Ngưỡng
 
-**Otsu's method** tự động tìm optimal threshold bằng cách maximizing inter-class variance.
+**Phương pháp Otsu** tự động tìm ngưỡng tối ưu bằng cách tối đa hóa phương sai giữa các lớp.
 
 ```python
-# Otsu's thresholding
+# Ngưỡng Otsu
 threshold_value, binary = cv2.threshold(
     gray,
-    0,        # Threshold value (ignored, auto-calculated)
+    0,        # Giá trị ngưỡng (bỏ qua, tự động tính)
     255,
     cv2.THRESH_BINARY + cv2.THRESH_OTSU
 )
 
-print(f"Otsu's threshold: {threshold_value}")
+print(f"Ngưỡng Otsu: {threshold_value}")
 ```
 
-### B. Với Gaussian Blur
+### B. Với Gaussian Blur (Làm Mờ Gaussian)
 
 ```python
-# Blur before Otsu (recommended)
+# Làm mờ trước Otsu (khuyến nghị)
 blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 threshold_value, binary = cv2.threshold(
     blurred,
@@ -111,25 +111,25 @@ threshold_value, binary = cv2.threshold(
 )
 ```
 
-### C. Complete Example
+### C. Ví Dụ Hoàn Chỉnh
 
 ```python
 def otsu_segmentation(image):
-    """Segment image using Otsu's method"""
+    """Phân vùng ảnh sử dụng phương pháp Otsu"""
 
-    # Convert to grayscale
+    # Chuyển sang ảnh xám
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
         gray = image
 
-    # Denoise
+    # Khử nhiễu
     denoised = cv2.fastNlMeansDenoising(gray, h=10)
 
-    # Blur
+    # Làm mờ
     blurred = cv2.GaussianBlur(denoised, (5, 5), 0)
 
-    # Otsu threshold
+    # Ngưỡng Otsu
     threshold_value, binary = cv2.threshold(
         blurred,
         0,
@@ -137,7 +137,7 @@ def otsu_segmentation(image):
         cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )
 
-    # Morphology (optional)
+    # Hình thái (tùy chọn)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
@@ -147,94 +147,94 @@ def otsu_segmentation(image):
 
 ---
 
-## 4. Adaptive Thresholding
+## 4. Adaptive Thresholding (Ngưỡng Thích Ứng)
 
-### A. Motivation
+### A. Động Lực
 
-**Problem với Global Threshold:**
+**Vấn Đề Với Ngưỡng Toàn Cục:**
 - Ánh sáng không đồng đều
-- Shadows
-- Gradients
+- Bóng đổ
+- Độ chuyển màu
 
-**Solution:** Local thresholds khác nhau cho từng region
+**Giải Pháp:** Ngưỡng cục bộ khác nhau cho từng vùng
 
-### B. Adaptive Mean
+### B. Adaptive Mean (Trung Bình Thích Ứng)
 
 ```python
-# Adaptive threshold với mean
+# Ngưỡng thích ứng với trung bình
 binary = cv2.adaptiveThreshold(
     gray,
-    255,                        # Max value
-    cv2.ADAPTIVE_THRESH_MEAN_C, # Method
-    cv2.THRESH_BINARY,          # Type
-    11,                         # Block size (must be odd)
-    2                           # Constant C
+    255,                        # Giá trị max
+    cv2.ADAPTIVE_THRESH_MEAN_C, # Phương pháp
+    cv2.THRESH_BINARY,          # Loại
+    11,                         # Kích thước khối (phải lẻ)
+    2                           # Hằng số C
 )
 ```
 
-**Formula:**
+**Công Thức:**
 ```
-threshold(x, y) = mean(neighborhood) - C
+ngưỡng(x, y) = trung_bình(vùng_lân_cận) - C
 ```
 
-### C. Adaptive Gaussian
+### C. Adaptive Gaussian (Gaussian Thích Ứng)
 
 ```python
-# Adaptive threshold với Gaussian weighted mean
+# Ngưỡng thích ứng với trung bình có trọng số Gaussian
 binary = cv2.adaptiveThreshold(
     gray,
     255,
-    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  # Gaussian weighted
+    cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  # Trọng số Gaussian
     cv2.THRESH_BINARY,
-    11,  # Block size
-    2    # Constant C
+    11,  # Kích thước khối
+    2    # Hằng số C
 )
 ```
 
-**Formula:**
+**Công Thức:**
 ```
-threshold(x, y) = gaussian_weighted_mean(neighborhood) - C
+ngưỡng(x, y) = trung_bình_trọng_số_gaussian(vùng_lân_cận) - C
 ```
 
-### D. Parameter Tuning
+### D. Điều Chỉnh Tham Số
 
-#### Block Size
+#### Kích Thước Khối
 
 ```python
-# Small block size (7-11): For detailed images
+# Khối nhỏ (7-11): Cho ảnh chi tiết
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 7, 2)
 
-# Medium block size (11-21): General purpose (recommended)
+# Khối trung bình (11-21): Mục đích chung (khuyến nghị)
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 11, 2)
 
-# Large block size (21-41): For large uniform regions
+# Khối lớn (21-41): Cho vùng đồng nhất lớn
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 31, 2)
 ```
 
-#### Constant C
+#### Hằng Số C
 
 ```python
-# Small C (0-2): Foreground expands
+# C nhỏ (0-2): Nền trước mở rộng
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 11, 1)
 
-# Medium C (2-5): Balanced (recommended)
+# C trung bình (2-5): Cân bằng (khuyến nghị)
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 11, 3)
 
-# Large C (5-10): Background expands
+# C lớn (5-10): Nền sau mở rộng
 binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
                                cv2.THRESH_BINARY, 11, 7)
 ```
 
-### E. Complete Example
+### E. Ví Dụ Hoàn Chỉnh
 
 ```python
 class AdaptiveThresholder:
-    """Adaptive thresholding with auto-tuning"""
+    """Ngưỡng thích ứng với tự động điều chỉnh"""
 
     def __init__(self, method='gaussian', block_size=11, C=2):
         self.method = method
@@ -242,21 +242,21 @@ class AdaptiveThresholder:
         self.C = C
 
     def threshold(self, image):
-        """Apply adaptive threshold"""
+        """Áp dụng ngưỡng thích ứng"""
 
-        # Convert to grayscale
+        # Chuyển sang ảnh xám
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             gray = image
 
-        # Choose method
+        # Chọn phương pháp
         if self.method == 'mean':
             adaptive_method = cv2.ADAPTIVE_THRESH_MEAN_C
         else:  # gaussian
             adaptive_method = cv2.ADAPTIVE_THRESH_GAUSSIAN_C
 
-        # Apply threshold
+        # Áp dụng ngưỡng
         binary = cv2.adaptiveThreshold(
             gray,
             255,
@@ -269,19 +269,19 @@ class AdaptiveThresholder:
         return binary
 
     def auto_tune(self, image):
-        """Auto-tune parameters based on image characteristics"""
+        """Tự động điều chỉnh tham số dựa trên đặc tính ảnh"""
 
-        # Convert to grayscale
+        # Chuyển sang ảnh xám
         if len(image.shape) == 3:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
             gray = image
 
-        # Analyze image
+        # Phân tích ảnh
         mean_brightness = np.mean(gray)
         std_brightness = np.std(gray)
 
-        # Adjust block size based on image size
+        # Điều chỉnh kích thước khối dựa trên kích thước ảnh
         h, w = gray.shape
         image_size = h * w
 
@@ -292,7 +292,7 @@ class AdaptiveThresholder:
         else:
             self.block_size = 21
 
-        # Adjust C based on std
+        # Điều chỉnh C dựa trên độ lệch chuẩn
         if std_brightness < 30:
             self.C = 2
         elif std_brightness < 60:
@@ -300,63 +300,63 @@ class AdaptiveThresholder:
         else:
             self.C = 6
 
-        print(f"Auto-tuned: block_size={self.block_size}, C={self.C}")
+        print(f"Tự động điều chỉnh: block_size={self.block_size}, C={self.C}")
 
         return self.threshold(image)
 
 
-# Usage
+# Sử dụng
 thresholder = AdaptiveThresholder(method='gaussian', block_size=11, C=2)
 
-# Manual
+# Thủ công
 binary = thresholder.threshold(image)
 
-# Auto-tune
+# Tự động điều chỉnh
 binary = thresholder.auto_tune(image)
 ```
 
 ---
 
-## 5. Multi-Otsu Thresholding
+## 5. Multi-Otsu Thresholding (Ngưỡng Đa Otsu)
 
-### A. Multiple Thresholds
+### A. Ngưỡng Đa Mức
 
 ```python
 from skimage.filters import threshold_multiotsu
 
-# Calculate multiple thresholds
-thresholds = threshold_multiotsu(gray, classes=3)  # 3 classes = 2 thresholds
+# Tính nhiều ngưỡng
+thresholds = threshold_multiotsu(gray, classes=3)  # 3 lớp = 2 ngưỡng
 
-print(f"Thresholds: {thresholds}")
+print(f"Ngưỡng: {thresholds}")
 
-# Apply thresholds
+# Áp dụng ngưỡng
 regions = np.digitize(gray, bins=thresholds)
 
-# Visualize regions
+# Trực quan hóa vùng
 result = np.zeros_like(gray)
 for i in range(len(thresholds) + 1):
     result[regions == i] = int(255 * i / len(thresholds))
 ```
 
-### B. Using OpenCV
+### B. Sử Dụng OpenCV
 
 ```python
 def multi_threshold_opencv(gray, n_classes=3):
-    """Multi-level thresholding using OpenCV"""
+    """Ngưỡng đa mức sử dụng OpenCV"""
 
-    # Calculate histogram
+    # Tính histogram
     hist = cv2.calcHist([gray], [0], None, [256], [0, 256])
 
-    # Find peaks (simplified Otsu for multiple classes)
-    # This is a simplified version; skimage is better for multi-Otsu
+    # Tìm đỉnh (Otsu đơn giản hóa cho nhiều lớp)
+    # Đây là phiên bản đơn giản; skimage tốt hơn cho multi-Otsu
 
-    # For demonstration: divide range into n_classes
+    # Để minh họa: chia phạm vi thành n_classes
     thresholds = []
     for i in range(1, n_classes):
         t = int(256 * i / n_classes)
         thresholds.append(t)
 
-    # Apply thresholds
+    # Áp dụng ngưỡng
     result = np.zeros_like(gray)
 
     for i, t in enumerate(thresholds):
@@ -372,39 +372,39 @@ def multi_threshold_opencv(gray, n_classes=3):
 
 ---
 
-## 6. Triangle Thresholding
+## 6. Triangle Thresholding (Ngưỡng Tam Giác)
 
-### A. Method
+### A. Phương Pháp
 
-Triangle method tốt cho images với **one dominant peak** và **long tail** trong histogram.
+Phương pháp tam giác tốt cho ảnh có **một đỉnh chủ đạo** và **đuôi dài** trong histogram.
 
 ```python
 from skimage.filters import threshold_triangle
 
-# Calculate threshold
+# Tính ngưỡng
 threshold_value = threshold_triangle(gray)
 
-# Apply threshold
+# Áp dụng ngưỡng
 _, binary = cv2.threshold(gray, threshold_value, 255, cv2.THRESH_BINARY)
 ```
 
 ---
 
-## 7. Color-Based Thresholding
+## 7. Color-Based Thresholding (Ngưỡng Theo Màu)
 
-### A. HSV Thresholding
+### A. HSV Thresholding (Ngưỡng HSV)
 
 ```python
 def threshold_by_color(image, lower_hsv, upper_hsv):
-    """Threshold image by color range"""
+    """Ngưỡng ảnh theo phạm vi màu"""
 
-    # Convert to HSV
+    # Chuyển sang HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-    # Create mask
+    # Tạo mặt nạ
     mask = cv2.inRange(hsv, lower_hsv, upper_hsv)
 
-    # Morphology
+    # Hình thái
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
@@ -412,7 +412,7 @@ def threshold_by_color(image, lower_hsv, upper_hsv):
     return mask
 
 
-# Example: Detect red objects
+# Ví dụ: Phát hiện đối tượng màu đỏ
 lower_red1 = np.array([0, 100, 100])
 upper_red1 = np.array([10, 255, 255])
 
@@ -422,7 +422,7 @@ upper_red2 = np.array([180, 255, 255])
 mask1 = threshold_by_color(image, lower_red1, upper_red1)
 mask2 = threshold_by_color(image, lower_red2, upper_red2)
 
-# Combine masks (red wraps around in HSV)
+# Kết hợp mặt nạ (đỏ quấn quanh trong HSV)
 red_mask = cv2.bitwise_or(mask1, mask2)
 ```
 
@@ -508,50 +508,50 @@ def threshold_with_clahe(image, clip_limit=2.0, tile_grid_size=(8, 8)):
 
 ---
 
-## 9. Comparison of Methods
+## 9. So Sánh Các Phương Pháp
 
-| Method | Speed | Quality | Adaptive | Use Case |
+| Phương Pháp | Tốc Độ | Chất Lượng | Thích Ứng | Trường Hợp Sử Dụng |
 |--------|-------|---------|----------|----------|
-| Global | Fast ✅ | Poor | No | Uniform lighting |
-| Otsu | Fast ✅ | Good | No | Bimodal histogram |
-| Adaptive Mean | Medium | Good | Yes ✅ | Non-uniform light |
-| Adaptive Gaussian | Medium | Better ✅ | Yes ✅ | Non-uniform light |
-| Multi-Otsu | Medium | Good | No | Multiple classes |
-| Triangle | Fast | Good | No | Skewed histogram |
-| Color (HSV) | Fast | Excellent ✅ | No | Color segmentation |
+| Toàn Cục | Nhanh ✅ | Kém | Không | Ánh sáng đồng đều |
+| Otsu | Nhanh ✅ | Tốt | Không | Histogram hai đỉnh |
+| Adaptive Mean | Trung Bình | Tốt | Có ✅ | Ánh sáng không đồng đều |
+| Adaptive Gaussian | Trung Bình | Tốt Hơn ✅ | Có ✅ | Ánh sáng không đồng đều |
+| Multi-Otsu | Trung Bình | Tốt | Không | Nhiều lớp |
+| Triangle | Nhanh | Tốt | Không | Histogram lệch |
+| Color (HSV) | Nhanh | Xuất Sắc ✅ | Không | Phân vùng màu |
 
 ---
 
-## 10. Best Practices
+## 10. Best Practices (Thực Hành Tốt)
 
-### A. Pre-processing Pipeline
+### A. Pre-processing Pipeline (Quy Trình Tiền Xử Lý)
 
 ```python
 def robust_threshold(image):
-    """Robust thresholding pipeline"""
+    """Quy trình ngưỡng hóa mạnh mẽ"""
 
-    # 1. Convert to grayscale
+    # 1. Chuyển sang ảnh xám
     if len(image.shape) == 3:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     else:
         gray = image
 
-    # 2. Denoise
+    # 2. Khử nhiễu
     denoised = cv2.fastNlMeansDenoising(gray, h=10)
 
-    # 3. CLAHE (if low contrast)
+    # 3. CLAHE (nếu độ tương phản thấp)
     std = np.std(denoised)
     if std < 40:
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         denoised = clahe.apply(denoised)
 
-    # 4. Blur
+    # 4. Làm mờ
     blurred = cv2.GaussianBlur(denoised, (5, 5), 0)
 
-    # 5. Threshold
+    # 5. Ngưỡng hóa
     #binary, _ = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-    # Alternative: Adaptive for non-uniform lighting
+    # Thay thế: Thích ứng cho ánh sáng không đồng đều
     binary = cv2.adaptiveThreshold(
         blurred,
         255,
@@ -561,7 +561,7 @@ def robust_threshold(image):
         2
     )
 
-    # 6. Morphology
+    # 6. Hình thái
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
@@ -569,19 +569,19 @@ def robust_threshold(image):
     return binary
 ```
 
-### B. Validation
+### B. Validation (Xác Thực)
 
 ```python
 def evaluate_threshold(binary, ground_truth):
-    """Evaluate thresholding result"""
+    """Đánh giá kết quả ngưỡng hóa"""
 
-    # Calculate metrics
+    # Tính các chỉ số
     TP = np.sum((binary == 255) & (ground_truth == 255))
     FP = np.sum((binary == 255) & (ground_truth == 0))
     FN = np.sum((binary == 0) & (ground_truth == 255))
     TN = np.sum((binary == 0) & (ground_truth == 0))
 
-    # Metrics
+    # Chỉ số
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0

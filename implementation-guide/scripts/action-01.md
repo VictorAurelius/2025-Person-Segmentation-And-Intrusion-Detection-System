@@ -274,3 +274,10 @@ hãy sửa lại code, tôi muốn khi trả ra output (video, log, ...) sẽ l�
 hãy đọc readme để hiểu context của repo
 
 tôi muốn khi trả ra output (video, log, ...) sẽ lưu vào 1 thư mục riêng dựa trên tên video, ví dụ output/input-01 để tránh nhầm output với các input khác => done, nhưng nó vẫn tạo ra folder screenshots và file alerts.log rỗng, mỗi khi chạy => hãy sửa lỗi này
+
+folder knowledge-base chứa kiến thức cơ bản cần biết để hiểu dự án này
+
+nhưng những tài liệu này đang nửa anh nửa việt
+tôi muốn nó chuyên nghiệp ngôn ngữ:
++ chỉ giữ lại những từ tiếng Anh chuyên nghành và có mở ngoặc giải nghĩa ngay tại đó
++ tất cả các từ không quan trọng chuyển hết sang tiếng việt

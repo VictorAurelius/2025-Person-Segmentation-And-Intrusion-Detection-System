@@ -1,23 +1,23 @@
-# Frame Differencing
+# Frame Differencing (So Sánh Khung Hình)
 
 ## 1. Khái Niệm
 
-**Frame Differencing** là kỹ thuật motion detection đơn giản nhất, phát hiện chuyển động bằng cách so sánh sự khác biệt giữa các frames liên tiếp.
+**Frame Differencing (so sánh khung hình)** là kỹ thuật Motion Detection (phát hiện chuyển động) đơn giản nhất, phát hiện chuyển động bằng cách so sánh sự khác biệt giữa các frames liên tiếp.
 
 ### A. Nguyên Lý Cơ Bản
 
 ```
-Motion = | Frame(t) - Frame(t-1) |
+Chuyển Động = | Frame(t) - Frame(t-1) |
 ```
 
-**Nếu pixel thay đổi đáng kể** → Motion detected
-**Nếu pixel không đổi** → Static background
+**Nếu pixel thay đổi đáng kể** → Phát hiện chuyển động
+**Nếu pixel không đổi** → Nền tĩnh
 
 ---
 
-## 2. Two-Frame Differencing
+## 2. Two-Frame Differencing (So Sánh Hai Khung Hình)
 
-### A. Simple Implementation
+### A. Triển Khai Đơn Giản
 
 ```python
 import cv2
@@ -25,7 +25,7 @@ import numpy as np
 
 cap = cv2.VideoCapture('video.mp4')
 
-# Read first frame
+# Đọc frame đầu tiên
 ret, prev_frame = cap.read()
 prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
 
@@ -34,56 +34,56 @@ while True:
     if not ret:
         break
 
-    # Convert to grayscale
+    # Chuyển sang ảnh xám
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Calculate absolute difference
+    # Tính sự khác biệt tuyệt đối
     diff = cv2.absdiff(prev_gray, gray)
 
-    # Threshold to get binary mask
+    # Ngưỡng hóa để lấy binary mask
     _, motion_mask = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
 
-    # Display
+    # Hiển thị
     cv2.imshow('Motion Mask', motion_mask)
     cv2.imshow('Original', frame)
 
     if cv2.waitKey(30) & 0xFF == ord('q'):
         break
 
-    # Update previous frame
+    # Cập nhật frame trước
     prev_gray = gray
 
 cap.release()
 cv2.destroyAllWindows()
 ```
 
-### B. Với Post-Processing
+### B. Với Hậu Xử Lý
 
 ```python
 def two_frame_differencing(prev_frame, curr_frame, threshold=25):
-    """Two-frame differencing với post-processing"""
+    """Two-frame differencing với hậu xử lý"""
 
-    # Convert to grayscale
+    # Chuyển sang ảnh xám
     prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
     curr_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
 
-    # Blur to reduce noise
+    # Làm mờ để giảm nhiễu
     prev_gray = cv2.GaussianBlur(prev_gray, (5, 5), 0)
     curr_gray = cv2.GaussianBlur(curr_gray, (5, 5), 0)
 
-    # Calculate difference
+    # Tính sự khác biệt
     diff = cv2.absdiff(prev_gray, curr_gray)
 
-    # Threshold
+    # Ngưỡng hóa
     _, motion_mask = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)
 
-    # Morphological operations
+    # Phép toán hình thái
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
-    # Remove noise (opening)
+    # Loại bỏ nhiễu (opening)
     motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_OPEN, kernel)
 
-    # Fill holes (closing)
+    # Lấp lỗ (closing)
     motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_CLOSE, kernel)
 
     return motion_mask
@@ -91,63 +91,63 @@ def two_frame_differencing(prev_frame, curr_frame, threshold=25):
 
 ---
 
-## 3. Three-Frame Differencing
+## 3. Three-Frame Differencing (So Sánh Ba Khung Hình)
 
 ### A. Nguyên Lý
 
-Three-frame differencing giảm false positives bằng cách yêu cầu motion xuất hiện trong cả 2 differences:
+Three-frame differencing giảm false positives (phát hiện sai) bằng cách yêu cầu chuyển động xuất hiện trong cả 2 sự khác biệt:
 
 ```
 Diff1 = | Frame(t) - Frame(t-1) |
 Diff2 = | Frame(t) - Frame(t-2) |
-Motion = Diff1 AND Diff2
+Chuyển Động = Diff1 AND Diff2
 ```
 
-### B. Implementation
+### B. Triển Khai
 
 ```python
 class ThreeFrameDifferencing:
-    """Three-frame differencing for robust motion detection"""
+    """Three-frame differencing cho phát hiện chuyển động mạnh mẽ"""
 
     def __init__(self, threshold=25):
         self.threshold = threshold
         self.frame_buffer = []
 
     def detect(self, frame):
-        """Detect motion using three frames"""
+        """Phát hiện chuyển động sử dụng ba frames"""
 
-        # Convert to grayscale
+        # Chuyển sang ảnh xám
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # Blur to reduce noise
+        # Làm mờ để giảm nhiễu
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
 
-        # Add to buffer
+        # Thêm vào buffer
         self.frame_buffer.append(gray)
 
-        # Keep only 3 frames
+        # Chỉ giữ 3 frames
         if len(self.frame_buffer) > 3:
             self.frame_buffer.pop(0)
 
-        # Need 3 frames for processing
+        # Cần 3 frames để xử lý
         if len(self.frame_buffer) < 3:
             return np.zeros(gray.shape, dtype=np.uint8)
 
-        # Get frames
+        # Lấy frames
         frame1, frame2, frame3 = self.frame_buffer
 
-        # Calculate differences
+        # Tính sự khác biệt
         diff1 = cv2.absdiff(frame2, frame1)
         diff2 = cv2.absdiff(frame3, frame2)
 
-        # Threshold
+        # Ngưỡng hóa
         _, mask1 = cv2.threshold(diff1, self.threshold, 255, cv2.THRESH_BINARY)
         _, mask2 = cv2.threshold(diff2, self.threshold, 255, cv2.THRESH_BINARY)
 
-        # Logical AND
+        # Phép AND logic
         motion_mask = cv2.bitwise_and(mask1, mask2)
 
-        # Morphological operations
+        # Phép toán hình thái
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_OPEN, kernel)
         motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_CLOSE, kernel)
@@ -155,7 +155,7 @@ class ThreeFrameDifferencing:
         return motion_mask
 
 
-# Usage
+# Sử dụng
 detector = ThreeFrameDifferencing(threshold=25)
 
 cap = cv2.VideoCapture('video.mp4')
@@ -165,10 +165,10 @@ while True:
     if not ret:
         break
 
-    # Detect motion
+    # Phát hiện chuyển động
     motion_mask = detector.detect(frame)
 
-    # Display
+    # Hiển thị
     cv2.imshow('Motion', motion_mask)
     cv2.imshow('Original', frame)
 
@@ -179,115 +179,115 @@ cap.release()
 cv2.destroyAllWindows()
 ```
 
-### C. Advantages of Three-Frame
+### C. Ưu Điểm Của Three-Frame
 
-**Two-Frame Issues:**
+**Vấn Đề Two-Frame:**
 ```
-Frame1: [Object at position A]
-Frame2: [Object moved to position B]
-Result: Motion detected at both A and B (false positive at A)
+Frame1: [Vật thể tại vị trí A]
+Frame2: [Vật thể di chuyển đến vị trí B]
+Kết quả: Phát hiện chuyển động tại cả A và B (false positive tại A)
 ```
 
-**Three-Frame Solution:**
+**Giải Pháp Three-Frame:**
 ```
-Frame1: [Object at position A]
-Frame2: [Object moved to position B]
-Frame3: [Object at position C]
+Frame1: [Vật thể tại vị trí A]
+Frame2: [Vật thể di chuyển đến vị trí B]
+Frame3: [Vật thể tại vị trí C]
 
-Diff1 = B and A (motion at both)
-Diff2 = C and B (motion only at B and C)
-AND = Only B (correct!)
+Diff1 = B và A (chuyển động tại cả hai)
+Diff2 = C và B (chuyển động chỉ tại B và C)
+AND = Chỉ B (đúng!)
 ```
 
 ---
 
-## 4. Weighted Frame Differencing
+## 4. Weighted Frame Differencing (So Sánh Khung Hình Có Trọng Số)
 
-### A. Exponential Moving Average
+### A. Exponential Moving Average (Trung Bình Động Mũ)
 
 ```python
 class WeightedFrameDiff:
-    """Frame differencing with weighted history"""
+    """Frame differencing với lịch sử có trọng số"""
 
     def __init__(self, alpha=0.1, threshold=25):
-        self.alpha = alpha  # Learning rate
+        self.alpha = alpha  # Tốc độ học
         self.threshold = threshold
         self.avg = None
 
     def detect(self, frame):
-        """Detect motion using weighted average"""
+        """Phát hiện chuyển động sử dụng trung bình có trọng số"""
 
-        # Convert to grayscale
+        # Chuyển sang ảnh xám
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
         gray_float = gray.astype(np.float32)
 
-        # Initialize average
+        # Khởi tạo trung bình
         if self.avg is None:
             self.avg = gray_float.copy()
             return np.zeros(gray.shape, dtype=np.uint8)
 
-        # Update weighted average
+        # Cập nhật trung bình có trọng số
         cv2.accumulateWeighted(gray_float, self.avg, self.alpha)
 
-        # Calculate difference
+        # Tính sự khác biệt
         diff = cv2.absdiff(gray_float, self.avg)
         diff = diff.astype(np.uint8)
 
-        # Threshold
+        # Ngưỡng hóa
         _, motion_mask = cv2.threshold(diff, self.threshold, 255, cv2.THRESH_BINARY)
 
-        # Morphology
+        # Phép toán hình thái
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_OPEN, kernel)
 
         return motion_mask
 
 
-# Usage
+# Sử dụng
 detector = WeightedFrameDiff(alpha=0.05, threshold=20)
 ```
 
-**Alpha Parameter:**
+**Tham Số Alpha:**
 ```
-alpha = 0.01:  Very slow adaptation (stable background)
-alpha = 0.05:  Slow adaptation (recommended)
-alpha = 0.1:   Medium adaptation
-alpha = 0.5:   Fast adaptation (tracks changes quickly)
+alpha = 0.01:  Thích ứng rất chậm (nền ổn định)
+alpha = 0.05:  Thích ứng chậm (khuyến nghị)
+alpha = 0.1:   Thích ứng trung bình
+alpha = 0.5:   Thích ứng nhanh (theo dõi thay đổi nhanh)
 ```
 
 ---
 
-## 5. Adaptive Thresholding
+## 5. Adaptive Thresholding (Ngưỡng Hóa Thích Ứng)
 
-### A. Auto-Threshold Selection
+### A. Chọn Ngưỡng Tự Động
 
 ```python
 def auto_threshold_diff(prev_gray, curr_gray, percentile=95):
-    """Auto-select threshold based on difference distribution"""
+    """Tự động chọn ngưỡng dựa trên phân phối sự khác biệt"""
 
-    # Calculate difference
+    # Tính sự khác biệt
     diff = cv2.absdiff(prev_gray, curr_gray)
 
-    # Use percentile as threshold
+    # Dùng percentile làm ngưỡng
     threshold = np.percentile(diff, percentile)
 
-    # Apply threshold
+    # Áp dụng ngưỡng
     _, motion_mask = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)
 
     return motion_mask, threshold
 ```
 
-### B. Otsu's Threshold
+### B. Otsu's Threshold (Ngưỡng Otsu)
 
 ```python
 def otsu_frame_diff(prev_gray, curr_gray):
-    """Use Otsu's method for automatic threshold"""
+    """Sử dụng phương pháp Otsu cho ngưỡng tự động"""
 
-    # Calculate difference
+    # Tính sự khác biệt
     diff = cv2.absdiff(prev_gray, curr_gray)
 
-    # Otsu threshold
+    # Ngưỡng Otsu
     threshold, motion_mask = cv2.threshold(
         diff,
         0,
@@ -295,46 +295,46 @@ def otsu_frame_diff(prev_gray, curr_gray):
         cv2.THRESH_BINARY + cv2.THRESH_OTSU
     )
 
-    print(f"Auto threshold: {threshold}")
+    print(f"Ngưỡng tự động: {threshold}")
 
     return motion_mask
 ```
 
 ---
 
-## 6. Region-Based Differencing
+## 6. Region-Based Differencing (So Sánh Theo Vùng)
 
-### A. Block-Based Motion Detection
+### A. Block-Based Motion Detection (Phát Hiện Chuyển Động Theo Khối)
 
 ```python
 def block_based_motion(prev_gray, curr_gray, block_size=16, threshold=500):
-    """Detect motion at block level"""
+    """Phát hiện chuyển động ở mức khối"""
 
     h, w = prev_gray.shape
     motion_map = np.zeros((h, w), dtype=np.uint8)
 
     for y in range(0, h - block_size, block_size):
         for x in range(0, w - block_size, block_size):
-            # Extract blocks
+            # Trích xuất khối
             block_prev = prev_gray[y:y+block_size, x:x+block_size]
             block_curr = curr_gray[y:y+block_size, x:x+block_size]
 
-            # Calculate difference
+            # Tính sự khác biệt
             diff = cv2.absdiff(block_prev, block_curr)
             block_motion = np.sum(diff)
 
-            # If motion exceeds threshold
+            # Nếu chuyển động vượt ngưỡng
             if block_motion > threshold:
                 motion_map[y:y+block_size, x:x+block_size] = 255
 
     return motion_map
 ```
 
-### B. Grid Visualization
+### B. Trực Quan Hóa Lưới
 
 ```python
 def visualize_block_motion(frame, motion_map, block_size=16):
-    """Visualize block-based motion"""
+    """Trực quan hóa chuyển động theo khối"""
 
     result = frame.copy()
     h, w = motion_map.shape
@@ -342,7 +342,7 @@ def visualize_block_motion(frame, motion_map, block_size=16):
     for y in range(0, h - block_size, block_size):
         for x in range(0, w - block_size, block_size):
             if motion_map[y, x] == 255:
-                # Draw rectangle for motion blocks
+                # Vẽ hình chữ nhật cho các khối chuyển động
                 cv2.rectangle(result, (x, y), (x + block_size, y + block_size),
                             (0, 255, 0), 2)
 
@@ -351,11 +351,11 @@ def visualize_block_motion(frame, motion_map, block_size=16):
 
 ---
 
-## 7. Complete Motion Detector
+## 7. Bộ Phát Hiện Chuyển Động Hoàn Chỉnh
 
 ```python
 class FrameDifferencingDetector:
-    """Complete frame differencing motion detector"""
+    """Bộ phát hiện chuyển động frame differencing hoàn chỉnh"""
 
     def __init__(self, method='three_frame', threshold=25, min_area=500):
         self.method = method
@@ -364,20 +364,20 @@ class FrameDifferencingDetector:
         self.frame_buffer = []
 
     def detect(self, frame):
-        """Detect motion in frame"""
+        """Phát hiện chuyển động trong frame"""
 
-        # Convert to grayscale and blur
+        # Chuyển sang ảnh xám và làm mờ
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (5, 5), 0)
 
-        # Add to buffer
+        # Thêm vào buffer
         self.frame_buffer.append(gray)
 
-        # Limit buffer size
+        # Giới hạn kích thước buffer
         if len(self.frame_buffer) > 3:
             self.frame_buffer.pop(0)
 
-        # Choose method
+        # Chọn phương pháp
         if self.method == 'two_frame':
             motion_mask = self._two_frame()
         elif self.method == 'three_frame':
@@ -385,7 +385,7 @@ class FrameDifferencingDetector:
         else:
             motion_mask = np.zeros(gray.shape, dtype=np.uint8)
 
-        # Post-process
+        # Hậu xử lý
         motion_mask = self._post_process(motion_mask)
 
         return motion_mask
@@ -429,13 +429,13 @@ class FrameDifferencingDetector:
         """Get contours from mask"""
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        # Filter by area
+        # Lọc theo diện tích
         filtered = [c for c in contours if cv2.contourArea(c) >= self.min_area]
 
         return filtered
 
 
-# Usage
+# Sử dụng
 detector = FrameDifferencingDetector(method='three_frame', threshold=25, min_area=500)
 
 cap = cv2.VideoCapture('video.mp4')
@@ -445,17 +445,17 @@ while True:
     if not ret:
         break
 
-    # Detect motion
+    # Phát hiện chuyển động
     motion_mask = detector.detect(frame)
 
-    # Get contours
+    # Lấy contours
     contours = detector.get_contours(motion_mask)
 
-    # Draw results
+    # Vẽ kết quả
     result = frame.copy()
     cv2.drawContours(result, contours, -1, (0, 255, 0), 2)
 
-    # Display
+    # Hiển thị
     cv2.imshow('Motion Mask', motion_mask)
     cv2.imshow('Result', result)
 
@@ -468,9 +468,9 @@ cv2.destroyAllWindows()
 
 ---
 
-## 8. Comparison với Other Methods
+## 8. So Sánh Với Các Phương Pháp Khác
 
-### A. Frame Differencing vs Background Subtraction
+### A. Frame Differencing vs Background Subtraction (So Sánh)
 
 | Aspect | Frame Diff | Background Sub |
 |--------|------------|----------------|
@@ -481,16 +481,16 @@ cv2.destroyAllWindows()
 | Static Objects | Not detected ✅ | May detect ⚠️ |
 | Lighting Changes | Sensitive ⚠️ | Adaptive ✅ |
 
-### B. When to Use Frame Differencing
+### B. Khi Nào Dùng Frame Differencing
 
-**Good for:**
+**Tốt cho:**
 - ✅ Fast moving objects
 - ✅ Real-time performance critical
 - ✅ Simple scenes
 - ✅ Temporary motion detection
 - ✅ Quick prototyping
 
-**Not good for:**
+**Không tốt cho:**
 - ❌ Slow moving objects
 - ❌ Static camera with learning phase available
 - ❌ Complex lighting conditions
@@ -498,9 +498,9 @@ cv2.destroyAllWindows()
 
 ---
 
-## 9. Performance Optimization
+## 9. Tối Ưu Hiệu Năng
 
-### A. Multi-Scale Processing
+### A. Xử Lý Đa Tỷ Lệ
 
 ```python
 def multi_scale_diff(prev_frame, curr_frame, scales=[1.0, 0.5, 0.25]):
@@ -517,7 +517,7 @@ def multi_scale_diff(prev_frame, curr_frame, scales=[1.0, 0.5, 0.25]):
             prev_scaled = prev_frame
             curr_scaled = curr_frame
 
-        # Detect motion
+        # Phát hiện chuyển động
         diff = cv2.absdiff(prev_scaled, curr_scaled)
         _, mask = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
 
@@ -535,7 +535,7 @@ def multi_scale_diff(prev_frame, curr_frame, scales=[1.0, 0.5, 0.25]):
     return combined
 ```
 
-### B. GPU Acceleration
+### B. Tăng Tốc GPU
 
 ```python
 import cv2.cuda as cuda
@@ -559,16 +559,16 @@ motion_mask = gpu_mask.download()
 
 ---
 
-## 10. Troubleshooting
+## 10. Khắc Phục Sự Cố
 
-### A. Too Many False Positives
+### A. Quá Nhiều False Positives
 
-**Causes:**
+**Nguyên nhân:**
 - Camera shake
 - Lighting changes
 - Noise
 
-**Solutions:**
+**Giải pháp:**
 ```python
 # 1. Increase threshold
 detector = FrameDifferencingDetector(threshold=35)
@@ -586,13 +586,13 @@ detector = FrameDifferencingDetector(method='three_frame')
 # 5. Stabilize camera (if possible)
 ```
 
-### B. Missing Slow Motion
+### B. Bỏ Lỡ Chuyển Động Chậm
 
-**Causes:**
+**Nguyên nhân:**
 - Object moves too slowly between frames
 - Threshold too high
 
-**Solutions:**
+**Giải pháp:**
 ```python
 # 1. Lower threshold
 detector = FrameDifferencingDetector(threshold=15)
@@ -604,19 +604,19 @@ detector = WeightedFrameDiff(alpha=0.05, threshold=20)
 diff = cv2.absdiff(frame_buffer[-1], frame_buffer[-5])  # 5 frames ago
 ```
 
-### C. Ghost Objects
+### C. Vật Thể Ảo
 
-**Problem:** Objects leave "trails" or appear at old positions
+**Vấn đề:** Objects leave "trails" or appear at old positions
 
-**Cause:** Two-frame differencing creates ghosts
+**Nguyên nhân:** Two-frame differencing creates ghosts
 
-**Solution:**
+**Giải pháp:**
 ```python
 # Use three-frame differencing (eliminates ghosts)
 detector = FrameDifferencingDetector(method='three_frame')
 ```
 
-**Visualization:**
+**Trực quan:**
 ```
 Two-Frame:
 Frame t-1: [Object at A]
@@ -634,9 +634,9 @@ AND:   Motion at A.5 only (no ghost!)
 
 ---
 
-## 11. Advanced Techniques
+## 11. Kỹ Thuật Nâng Cao
 
-### A. Temporal Median Filter
+### A. Bộ Lọc Trung Vị Thời Gian
 
 ```python
 from collections import deque
@@ -673,7 +673,7 @@ class TemporalMedianDiff:
         return mask
 ```
 
-### B. Bilateral Frame Difference
+### B. Sự Khác Biệt Frame Song Phương
 
 ```python
 def bilateral_frame_diff(prev_gray, curr_gray, threshold=25):

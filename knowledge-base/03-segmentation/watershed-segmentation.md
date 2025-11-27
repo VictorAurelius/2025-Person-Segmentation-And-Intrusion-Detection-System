@@ -1,141 +1,141 @@
-# Watershed Segmentation
+# Watershed Segmentation (Phân Vùng Watershed)
 
 ## 1. Khái Niệm
 
-**Watershed Segmentation** là thuật toán dựa trên topological interpretation của image, xử lý grayscale image như một topographic surface.
+**Watershed Segmentation (phân vùng watershed/phân thủy)** là thuật toán dựa trên diễn giải topo của ảnh, xử lý ảnh xám như một bề mặt địa hình.
 
-### A. Metaphor
+### A. Ẩn Dụ
 
-Tưởng tượng grayscale image như địa hình:
-- **Bright regions** = Peaks (đỉnh núi)
-- **Dark regions** = Valleys (thung lũng)
-- **Gradients** = Slopes (dốc)
+Tưởng tượng ảnh xám như địa hình:
+- **Vùng sáng** = Đỉnh núi
+- **Vùng tối** = Thung lũng
+- **Gradients (độ dốc)** = Sườn núi
 
-Nếu đổ nước vào thung lũng, nước sẽ dâng lên và tạo thành các **watersheds** (phân thủy).
+Nếu đổ nước vào thung lũng, nước sẽ dâng lên và tạo thành các **watersheds (phân thủy)**.
 
 ---
 
-## 2. Algorithm Principle
+## 2. Nguyên Lý Thuật Toán
 
-### A. Flooding Process
-
-```
-1. Tìm local minima (valleys)
-2. Đánh dấu mỗi valley với unique label
-3. "Đổ nước" vào valleys (flooding)
-4. Khi 2 "vùng nước" gặp nhau → Watershed line
-5. Watersheds tạo thành boundaries giữa objects
-```
-
-### B. Visualization
+### A. Quá Trình Ngập Lụt
 
 ```
-Image Intensity Profile:
+1. Tìm cực tiểu cục bộ (thung lũng)
+2. Đánh dấu mỗi thung lũng với nhãn duy nhất
+3. "Đổ nước" vào thung lũng (ngập lụt)
+4. Khi 2 "vùng nước" gặp nhau → Đường phân thủy
+5. Watersheds tạo thành ranh giới giữa các đối tượng
+```
+
+### B. Trực Quan Hóa
+
+```
+Biểu đồ Cường độ Ảnh:
       ╱╲        ╱╲
      ╱  ╲      ╱  ╲
     ╱    ╲____╱    ╲
    ╱                ╲
   ╱                  ╲
 
-→ Valleys (markers) at ____
-→ Water rises ↑
-→ Watershed at peaks ╱╲
+→ Thung lũng (markers) tại ____
+→ Nước dâng lên ↑
+→ Watershed tại đỉnh ╱╲
 ```
 
 ---
 
-## 3. Basic Implementation
+## 3. Triển Khai Cơ Bản
 
-### A. Simple Watershed
+### A. Watershed Đơn Giản
 
 ```python
 import cv2
 import numpy as np
 from scipy import ndimage
 
-# Read image
+# Đọc ảnh
 image = cv2.imread('coins.jpg')
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Threshold
+# Ngưỡng hóa
 _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-# Noise removal
+# Loại bỏ nhiễu
 kernel = np.ones((3, 3), np.uint8)
 opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=2)
 
-# Sure background (dilation)
+# Nền sau chắc chắn (giãn nở)
 sure_bg = cv2.dilate(opening, kernel, iterations=3)
 
-# Sure foreground (distance transform)
+# Nền trước chắc chắn (biến đổi khoảng cách)
 dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
 _, sure_fg = cv2.threshold(dist_transform, 0.7 * dist_transform.max(), 255, 0)
 
-# Unknown region
+# Vùng không xác định
 sure_fg = np.uint8(sure_fg)
 unknown = cv2.subtract(sure_bg, sure_fg)
 
-# Label markers
+# Gắn nhãn markers
 _, markers = cv2.connectedComponents(sure_fg)
 
-# Add 1 to all labels (background = 1, not 0)
+# Thêm 1 vào tất cả nhãn (nền = 1, không phải 0)
 markers = markers + 1
 
-# Mark unknown region as 0
+# Đánh dấu vùng không xác định là 0
 markers[unknown == 255] = 0
 
-# Apply watershed
+# Áp dụng watershed
 markers = cv2.watershed(image, markers)
 
-# Mark boundaries
-image[markers == -1] = [255, 0, 0]  # Red boundaries
+# Đánh dấu ranh giới
+image[markers == -1] = [255, 0, 0]  # Ranh giới màu đỏ
 
-cv2.imshow('Result', image)
+cv2.imshow('Kết quả', image)
 cv2.waitKey(0)
 ```
 
 ---
 
-## 4. Marker-Controlled Watershed
+## 4. Marker-Controlled Watershed (Watershed Điều Khiển Bằng Markers)
 
-### A. Why Markers?
+### A. Tại Sao Cần Markers?
 
-**Problem:** Basic watershed over-segments (too many regions)
+**Vấn Đề:** Watershed cơ bản phân vùng quá mức (quá nhiều vùng)
 
-**Solution:** Use markers to guide segmentation
+**Giải Pháp:** Sử dụng markers để hướng dẫn phân vùng
 
-### B. Implementation
+### B. Triển Khai
 
 ```python
 class WatershedSegmentation:
-    """Marker-controlled watershed segmentation"""
+    """Phân vùng watershed điều khiển bằng markers"""
 
     def __init__(self):
         self.markers = None
 
     def segment(self, image, min_distance=20):
-        """Segment image using watershed"""
+        """Phân vùng ảnh sử dụng watershed"""
 
-        # Prepare image
+        # Chuẩn bị ảnh
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # Threshold
+        # Ngưỡng hóa
         _, binary = cv2.threshold(
             gray, 0, 255,
             cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
         )
 
-        # Remove noise
+        # Loại bỏ nhiễu
         kernel = np.ones((3, 3), np.uint8)
         opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=2)
 
-        # Sure background
+        # Nền sau chắc chắn
         sure_bg = cv2.dilate(opening, kernel, iterations=3)
 
-        # Distance transform
+        # Biến đổi khoảng cách
         dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
 
-        # Sure foreground
+        # Nền trước chắc chắn
         _, sure_fg = cv2.threshold(
             dist_transform,
             0.5 * dist_transform.max(),
@@ -144,53 +144,53 @@ class WatershedSegmentation:
         )
         sure_fg = np.uint8(sure_fg)
 
-        # Unknown region
+        # Vùng không xác định
         unknown = cv2.subtract(sure_bg, sure_fg)
 
-        # Marker labeling
+        # Gắn nhãn markers
         _, self.markers = cv2.connectedComponents(sure_fg)
 
-        # Add 1 to markers (background != 0)
+        # Thêm 1 vào markers (nền != 0)
         self.markers = self.markers + 1
 
-        # Mark unknown as 0
+        # Đánh dấu vùng không xác định là 0
         self.markers[unknown == 255] = 0
 
-        # Apply watershed
+        # Áp dụng watershed
         self.markers = cv2.watershed(image, self.markers)
 
         return self.markers
 
     def visualize(self, image, markers=None):
-        """Visualize segmentation result"""
+        """Trực quan hóa kết quả phân vùng"""
 
         if markers is None:
             markers = self.markers
 
         if markers is None:
-            raise ValueError("No markers available. Run segment() first.")
+            raise ValueError("Không có markers. Chạy segment() trước.")
 
         result = image.copy()
 
-        # Color each segment
+        # Tô màu mỗi vùng
         num_segments = markers.max()
 
         for i in range(2, num_segments + 1):
             mask = (markers == i).astype(np.uint8)
 
-            # Random color
+            # Màu ngẫu nhiên
             color = np.random.randint(0, 255, 3).tolist()
 
-            # Apply color
+            # Áp dụng màu
             result[mask == 1] = color
 
-        # Mark boundaries
+        # Đánh dấu ranh giới
         result[markers == -1] = [255, 0, 0]
 
         return result
 
     def get_contours(self, markers=None):
-        """Extract contours from markers"""
+        """Trích xuất đường viền từ markers"""
 
         if markers is None:
             markers = self.markers
@@ -201,7 +201,7 @@ class WatershedSegmentation:
         for i in range(2, num_segments + 1):
             mask = (markers == i).astype(np.uint8) * 255
 
-            # Find contour
+            # Tìm đường viền
             cnts, _ = cv2.findContours(
                 mask,
                 cv2.RETR_EXTERNAL,
@@ -214,31 +214,31 @@ class WatershedSegmentation:
         return contours
 
 
-# Usage
+# Sử dụng
 segmenter = WatershedSegmentation()
 
-# Segment
+# Phân vùng
 markers = segmenter.segment(image)
 
-# Visualize
+# Trực quan hóa
 result = segmenter.visualize(image)
-cv2.imshow('Watershed Segmentation', result)
+cv2.imshow('Phân Vùng Watershed', result)
 
-# Get contours
+# Lấy đường viền
 contours = segmenter.get_contours()
-print(f"Found {len(contours)} objects")
+print(f"Tìm thấy {len(contours)} đối tượng")
 ```
 
 ---
 
-## 5. Distance Transform
+## 5. Distance Transform (Biến Đổi Khoảng Cách)
 
-### A. Concept
+### A. Khái Niệm
 
-Distance Transform tính khoảng cách từ mỗi foreground pixel đến nearest background pixel.
+Distance Transform tính khoảng cách từ mỗi pixel nền trước đến pixel nền sau gần nhất.
 
 ```python
-# Binary image
+# Ảnh nhị phân
 binary = np.array([
     [0, 0, 0, 0, 0],
     [0, 1, 1, 1, 0],
@@ -247,18 +247,18 @@ binary = np.array([
     [0, 0, 0, 0, 0]
 ], dtype=np.uint8)
 
-# Distance transform
+# Biến đổi khoảng cách
 dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
 
-# Result (approximate):
+# Kết quả (xấp xỉ):
 # [0, 0, 0, 0, 0]
 # [0, 1, 1, 1, 0]
-# [0, 1, 2, 1, 0]  ← Center has highest distance
+# [0, 1, 2, 1, 0]  ← Tâm có khoảng cách cao nhất
 # [0, 1, 1, 1, 0]
 # [0, 0, 0, 0, 0]
 ```
 
-### B. Distance Metrics
+### B. Độ Đo Khoảng Cách
 
 ```python
 # Euclidean (L2)
@@ -271,22 +271,22 @@ dist_l1 = cv2.distanceTransform(binary, cv2.DIST_L1, 3)
 dist_linf = cv2.distanceTransform(binary, cv2.DIST_C, 3)
 ```
 
-### C. Peak Detection
+### C. Phát Hiện Đỉnh
 
 ```python
 def find_peaks(dist_transform, min_distance=20):
-    """Find peaks in distance transform"""
+    """Tìm đỉnh trong biến đổi khoảng cách"""
 
     from scipy.ndimage import maximum_filter
 
-    # Local maxima
+    # Cực đại cục bộ
     local_max = maximum_filter(dist_transform, size=min_distance) == dist_transform
 
-    # Threshold (only significant peaks)
+    # Ngưỡng (chỉ đỉnh đáng kể)
     threshold = 0.5 * dist_transform.max()
     peaks = local_max & (dist_transform > threshold)
 
-    # Get coordinates
+    # Lấy tọa độ
     coords = np.argwhere(peaks)
 
     return coords
@@ -419,43 +419,43 @@ def gradient_watershed(image):
 
 ---
 
-## 8. Separating Touching Objects
+## 8. Tách Các Đối Tượng Chạm Nhau
 
-### A. Problem
+### A. Vấn Đề
 
-Touching/overlapping objects appear as single blob.
+Các đối tượng chạm nhau/chồng lên nhau xuất hiện như một khối duy nhất.
 
-### B. Solution
+### B. Giải Pháp
 
 ```python
 def separate_touching_objects(binary_mask):
-    """Separate touching objects using watershed"""
+    """Tách đối tượng chạm nhau sử dụng watershed"""
 
-    # Distance transform
+    # Biến đổi khoảng cách
     dist_transform = cv2.distanceTransform(binary_mask, cv2.DIST_L2, 5)
 
-    # Find peaks (object centers)
+    # Tìm đỉnh (tâm đối tượng)
     _, sure_fg = cv2.threshold(dist_transform, 0.5 * dist_transform.max(), 255, 0)
     sure_fg = np.uint8(sure_fg)
 
-    # Dilate to find background
+    # Giãn nở để tìm nền
     kernel = np.ones((3, 3), np.uint8)
     sure_bg = cv2.dilate(binary_mask, kernel, iterations=3)
 
-    # Unknown region
+    # Vùng không xác định
     unknown = cv2.subtract(sure_bg, sure_fg)
 
-    # Label markers
+    # Gắn nhãn markers
     _, markers = cv2.connectedComponents(sure_fg)
     markers = markers + 1
     markers[unknown == 255] = 0
 
-    # Apply watershed
-    # Need 3-channel image
+    # Áp dụng watershed
+    # Cần ảnh 3 kênh
     image_3ch = cv2.cvtColor(binary_mask, cv2.COLOR_GRAY2BGR)
     markers = cv2.watershed(image_3ch, markers)
 
-    # Create separated mask
+    # Tạo mặt nạ đã tách
     separated = np.zeros_like(binary_mask)
     separated[markers > 1] = 255
 
@@ -464,34 +464,34 @@ def separate_touching_objects(binary_mask):
 
 ---
 
-## 9. Parameter Tuning
+## 9. Điều Chỉnh Tham Số
 
-### A. Distance Transform Threshold
+### A. Ngưỡng Biến Đổi Khoảng Cách
 
 ```python
-# Low threshold (0.3-0.5): More aggressive separation
+# Ngưỡng thấp (0.3-0.5): Tách mạnh hơn
 _, sure_fg = cv2.threshold(dist_transform, 0.3 * dist_transform.max(), 255, 0)
 
-# Medium threshold (0.5-0.7): Balanced (recommended)
+# Ngưỡng trung bình (0.5-0.7): Cân bằng (khuyến nghị)
 _, sure_fg = cv2.threshold(dist_transform, 0.6 * dist_transform.max(), 255, 0)
 
-# High threshold (0.7-0.9): Conservative separation
+# Ngưỡng cao (0.7-0.9): Tách bảo thủ
 _, sure_fg = cv2.threshold(dist_transform, 0.8 * dist_transform.max(), 255, 0)
 ```
 
-### B. Morphological Operations
+### B. Phép Toán Hình Thái
 
 ```python
-# Weak opening (less noise removal)
+# Opening yếu (loại bỏ nhiễu ít)
 opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=1)
 
-# Strong opening (more noise removal)
+# Opening mạnh (loại bỏ nhiễu nhiều)
 opening = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=3)
 
-# Small dilation (tight background)
+# Dilation nhỏ (nền chặt)
 sure_bg = cv2.dilate(opening, kernel, iterations=1)
 
-# Large dilation (wide background)
+# Dilation lớn (nền rộng)
 sure_bg = cv2.dilate(opening, kernel, iterations=5)
 ```
 
@@ -556,61 +556,61 @@ def color_watershed(image):
 
 ---
 
-## 11. Post-Processing
+## 11. Hậu Xử Lý
 
-### A. Merge Small Regions
+### A. Gộp Vùng Nhỏ
 
 ```python
 def merge_small_regions(markers, min_size=100):
-    """Merge regions smaller than min_size"""
+    """Gộp các vùng nhỏ hơn min_size"""
 
     unique_markers = np.unique(markers)
-    unique_markers = unique_markers[unique_markers > 1]  # Exclude 0, 1, -1
+    unique_markers = unique_markers[unique_markers > 1]  # Loại trừ 0, 1, -1
 
     for marker_id in unique_markers:
         region_mask = (markers == marker_id)
         region_size = np.sum(region_mask)
 
         if region_size < min_size:
-            # Find neighboring regions
+            # Tìm vùng lân cận
             dilated = cv2.dilate(region_mask.astype(np.uint8), np.ones((3, 3)))
             neighbors = markers[dilated == 1]
             neighbors = neighbors[neighbors != marker_id]
             neighbors = neighbors[neighbors > 1]
 
             if len(neighbors) > 0:
-                # Merge with most common neighbor
+                # Gộp với vùng lân cận phổ biến nhất
                 merge_to = np.bincount(neighbors).argmax()
                 markers[region_mask] = merge_to
 
     return markers
 ```
 
-### B. Smooth Boundaries
+### B. Làm Mượt Ranh Giới
 
 ```python
 def smooth_watershed_boundaries(markers):
-    """Smooth watershed boundaries"""
+    """Làm mượt ranh giới watershed"""
 
     smoothed = markers.copy()
 
-    # For each region
+    # Cho mỗi vùng
     unique_markers = np.unique(markers)
     unique_markers = unique_markers[unique_markers > 1]
 
     for marker_id in unique_markers:
-        # Get region mask
+        # Lấy mặt nạ vùng
         mask = (markers == marker_id).astype(np.uint8) * 255
 
-        # Find contour
+        # Tìm đường viền
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         if len(contours) > 0:
-            # Smooth contour
+            # Làm mượt đường viền
             epsilon = 0.01 * cv2.arcLength(contours[0], True)
             smoothed_contour = cv2.approxPolyDP(contours[0], epsilon, True)
 
-            # Update markers
+            # Cập nhật markers
             mask_new = np.zeros_like(mask)
             cv2.drawContours(mask_new, [smoothed_contour], 0, 255, -1)
 
@@ -621,68 +621,68 @@ def smooth_watershed_boundaries(markers):
 
 ---
 
-## 12. Complete Example
+## 12. Ví Dụ Hoàn Chỉnh
 
 ```python
 class AdvancedWatershed:
-    """Advanced watershed segmentation pipeline"""
+    """Quy trình phân vùng watershed nâng cao"""
 
     def __init__(self, min_area=100, dist_threshold=0.6):
         self.min_area = min_area
         self.dist_threshold = dist_threshold
 
     def segment(self, image):
-        """Complete segmentation pipeline"""
+        """Quy trình phân vùng hoàn chỉnh"""
 
-        # 1. Preprocessing
+        # 1. Tiền xử lý
         processed = self._preprocess(image)
 
-        # 2. Find markers
+        # 2. Tìm markers
         markers = self._find_markers(processed)
 
-        # 3. Apply watershed
+        # 3. Áp dụng watershed
         markers = cv2.watershed(image, markers)
 
-        # 4. Post-processing
+        # 4. Hậu xử lý
         markers = self._postprocess(markers)
 
         return markers
 
     def _preprocess(self, image):
-        """Preprocess image"""
+        """Tiền xử lý ảnh"""
 
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # Denoise
+        # Khử nhiễu
         denoised = cv2.fastNlMeansDenoising(gray, h=10)
 
-        # Threshold
+        # Ngưỡng hóa
         _, binary = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
-        # Morphology
+        # Hình thái
         kernel = np.ones((3, 3), np.uint8)
         binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel, iterations=2)
 
         return binary
 
     def _find_markers(self, binary):
-        """Find watershed markers"""
+        """Tìm markers watershed"""
 
-        # Distance transform
+        # Biến đổi khoảng cách
         dist = cv2.distanceTransform(binary, cv2.DIST_L2, 5)
 
-        # Sure foreground
+        # Nền trước chắc chắn
         _, sure_fg = cv2.threshold(dist, self.dist_threshold * dist.max(), 255, 0)
         sure_fg = np.uint8(sure_fg)
 
-        # Sure background
+        # Nền sau chắc chắn
         kernel = np.ones((3, 3), np.uint8)
         sure_bg = cv2.dilate(binary, kernel, iterations=3)
 
-        # Unknown
+        # Không xác định
         unknown = cv2.subtract(sure_bg, sure_fg)
 
-        # Label markers
+        # Gắn nhãn markers
         _, markers = cv2.connectedComponents(sure_fg)
         markers = markers + 1
         markers[unknown == 255] = 0
@@ -690,24 +690,24 @@ class AdvancedWatershed:
         return markers
 
     def _postprocess(self, markers):
-        """Post-process markers"""
+        """Hậu xử lý markers"""
 
-        # Merge small regions
+        # Gộp vùng nhỏ
         markers = merge_small_regions(markers, min_size=self.min_area)
 
         return markers
 
 
-# Usage
+# Sử dụng
 segmenter = AdvancedWatershed(min_area=200, dist_threshold=0.6)
 
 markers = segmenter.segment(image)
 
-# Visualize
+# Trực quan hóa
 result = image.copy()
 result[markers == -1] = [255, 0, 0]
 
-cv2.imshow('Watershed Result', result)
+cv2.imshow('Kết Quả Watershed', result)
 cv2.waitKey(0)
 ```
 

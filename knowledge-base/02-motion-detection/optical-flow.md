@@ -1,66 +1,66 @@
-# Optical Flow
+# Optical Flow (Dòng Quang Học)
 
 ## 1. Khái Niệm
 
-**Optical Flow** là pattern của apparent motion của objects, surfaces, và edges trong visual scene, được gây ra bởi relative motion giữa observer (camera) và scene.
+**Optical Flow (dòng quang học)** là pattern (mẫu) của apparent motion (chuyển động biểu kiến) của objects (vật thể), surfaces (bề mặt), và edges (cạnh) trong visual scene (cảnh trực quan), được gây ra bởi relative motion (chuyển động tương đối) giữa observer (người quan sát - camera) và scene (cảnh).
 
 ### A. Định Nghĩa
 
-Optical flow tính toán **motion vector field** giữa 2 frames:
+Optical flow tính toán **motion vector field (trường vector chuyển động)** giữa 2 frames:
 
 ```
 V(x, y) = (dx, dy)
 ```
 
 Trong đó:
-- `V(x, y)`: Velocity vector tại pixel (x, y)
-- `dx`: Displacement theo trục x
-- `dy`: Displacement theo trục y
+- `V(x, y)`: Velocity vector (vector vận tốc) tại pixel (x, y)
+- `dx`: Displacement (độ dịch chuyển) theo trục x
+- `dy`: Displacement (độ dịch chuyển) theo trục y
 
-### B. Assumptions
+### B. Giả Định
 
-Optical flow dựa trên 3 assumptions:
+Optical flow dựa trên 3 giả định:
 
-1. **Brightness Constancy**: Pixel intensity không đổi giữa frames
+1. **Brightness Constancy (Độ sáng không đổi)**: Pixel intensity (cường độ pixel) không đổi giữa frames
    ```
    I(x, y, t) = I(x + dx, y + dy, t + dt)
    ```
 
-2. **Temporal Continuity**: Motion changes smoothly over time
+2. **Temporal Continuity (Liên tục thời gian)**: Chuyển động thay đổi mượt mà theo thời gian
 
-3. **Spatial Coherence**: Neighboring pixels belong to same surface and have similar motion
+3. **Spatial Coherence (Tính mạch lạc không gian)**: Các pixel lân cận thuộc cùng một bề mặt và có chuyển động tương tự
 
 ---
 
-## 2. Lucas-Kanade Method
+## 2. Lucas-Kanade Method (Phương Pháp Lucas-Kanade)
 
 ### A. Giới Thiệu
 
-Lucas-Kanade là sparse optical flow method, tính motion vectors tại specific points (features) thay vì toàn bộ image.
+Lucas-Kanade là sparse (thưa) optical flow method, tính motion vectors (vector chuyển động) tại specific points (điểm cụ thể - features) thay vì toàn bộ image.
 
 **Paper:** "An Iterative Image Registration Technique" - Lucas & Kanade (1981)
 
-### B. Principle
+### B. Nguyên Lý
 
-Giả sử motion là constant trong local neighborhood:
+Giả sử motion là constant (không đổi) trong local neighborhood (vùng lân cận cục bộ):
 
 ```
-Optical Flow Equation:
+Optical Flow Equation (Phương trình Optical Flow):
 I_x * u + I_y * v + I_t = 0
 
 Trong đó:
-- I_x, I_y: Spatial image gradients
-- I_t: Temporal gradient
-- u, v: Flow vectors (dx/dt, dy/dt)
+- I_x, I_y: Spatial image gradients (gradient ảnh không gian)
+- I_t: Temporal gradient (gradient thời gian)
+- u, v: Flow vectors (vector dòng - dx/dt, dy/dt)
 ```
 
-### C. Implementation
+### C. Triển Khai
 
 ```python
 import cv2
 import numpy as np
 
-# Parameters for ShiTomasi corner detection
+# Tham số cho phát hiện góc ShiTomasi
 feature_params = dict(
     maxCorners=100,      # Số features tối đa
     qualityLevel=0.3,    # Quality threshold
@@ -68,7 +68,7 @@ feature_params = dict(
     blockSize=7          # Size of averaging block
 )
 
-# Parameters for Lucas-Kanade optical flow
+# Tham số cho optical flow Lucas-Kanade
 lk_params = dict(
     winSize=(15, 15),           # Window size
     maxLevel=2,                 # Pyramid levels
@@ -79,15 +79,15 @@ lk_params = dict(
     )
 )
 
-# Read first frame
+# Đọc frame đầu tiên
 cap = cv2.VideoCapture('video.mp4')
 ret, old_frame = cap.read()
 old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
 
-# Detect initial features
+# Phát hiện các đặc trưng ban đầu
 p0 = cv2.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
 
-# Create mask for drawing
+# Tạo mask để vẽ
 mask = np.zeros_like(old_frame)
 
 while True:
@@ -97,7 +97,7 @@ while True:
 
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    # Calculate optical flow
+    # Tính optical flow
     p1, st, err = cv2.calcOpticalFlowPyrLK(
         old_gray,
         frame_gray,
@@ -106,24 +106,24 @@ while True:
         **lk_params
     )
 
-    # Select good points
+    # Chọn điểm tốt
     if p1 is not None:
         good_new = p1[st == 1]
         good_old = p0[st == 1]
 
-    # Draw tracks
+    # Vẽ quỹ đạo
     for i, (new, old) in enumerate(zip(good_new, good_old)):
         a, b = new.ravel()
         c, d = old.ravel()
 
-        # Draw line (motion trail)
+        # Vẽ đường (quỹ đạo chuyển động)
         mask = cv2.line(mask, (int(a), int(b)), (int(c), int(d)),
                        (0, 255, 0), 2)
 
-        # Draw point
+        # Vẽ điểm
         frame = cv2.circle(frame, (int(a), int(b)), 5, (0, 0, 255), -1)
 
-    # Combine frame and mask
+    # Kết hợp frame và mask
     result = cv2.add(frame, mask)
 
     cv2.imshow('Optical Flow', result)
@@ -131,7 +131,7 @@ while True:
     if cv2.waitKey(30) & 0xFF == ord('q'):
         break
 
-    # Update previous frame and points
+    # Cập nhật frame và điểm trước
     old_gray = frame_gray.copy()
     p0 = good_new.reshape(-1, 1, 2)
 
@@ -139,7 +139,7 @@ cap.release()
 cv2.destroyAllWindows()
 ```
 
-### D. Parameters
+### D. Tham Số
 
 #### winSize
 
@@ -169,11 +169,11 @@ lk_params = dict(maxLevel=4, ...)
 
 ---
 
-## 3. Farneback Method
+## 3. Farneback Method (Phương Pháp Farneback)
 
 ### A. Giới Thiệu
 
-Farneback là dense optical flow method, tính motion vectors cho mọi pixel trong image.
+Farneback là dense (dày đặc) optical flow method, tính motion vectors cho mọi pixel trong image.
 
 **Paper:** "Two-Frame Motion Estimation Based on Polynomial Expansion" - Farneback (2003)
 
@@ -181,26 +181,26 @@ Farneback là dense optical flow method, tính motion vectors cho mọi pixel tr
 
 ```python
 def draw_flow(img, flow, step=16):
-    """Draw optical flow vectors on image"""
+    """Vẽ các vector optical flow lên ảnh"""
     h, w = img.shape[:2]
     y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2, -1).astype(int)
     fx, fy = flow[y, x].T
 
-    # Create lines
+    # Tạo các đường
     lines = np.vstack([x, y, x + fx, y + fy]).T.reshape(-1, 2, 2)
     lines = np.int32(lines + 0.5)
 
-    # Draw
+    # Vẽ
     vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
     cv2.polylines(vis, lines, 0, (0, 255, 0))
 
-    # Draw points
+    # Vẽ điểms
     for (x1, y1), (_x2, _y2) in lines:
         cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
 
     return vis
 
-# Read first frame
+# Đọc frame đầu tiên
 cap = cv2.VideoCapture('video.mp4')
 ret, frame1 = cap.read()
 prev_gray = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
@@ -212,7 +212,7 @@ while True:
 
     gray = cv2.cvtColor(frame2, cv2.COLOR_BGR2GRAY)
 
-    # Calculate dense optical flow
+    # Tính dense optical flow
     flow = cv2.calcOpticalFlowFarneback(
         prev_gray,
         gray,
@@ -226,7 +226,7 @@ while True:
         flags=0
     )
 
-    # Visualize
+    # Trực quan hóa
     result = draw_flow(gray, flow)
 
     cv2.imshow('Dense Optical Flow', result)
@@ -254,7 +254,7 @@ def draw_flow_vectors(img, flow, step=16):
         for x in range(0, w, step):
             fx, fy = flow[y, x]
 
-            # Draw arrow
+            # Vẽ arrow
             cv2.arrowedLine(
                 vis,
                 (x, y),
@@ -275,7 +275,7 @@ def flow_to_hsv(flow):
     h, w = flow.shape[:2]
     fx, fy = flow[:, :, 0], flow[:, :, 1]
 
-    # Calculate magnitude and angle
+    # Tính độ lớn and angle
     mag, ang = cv2.cartToPolar(fx, fy)
 
     # Create HSV image
@@ -292,35 +292,35 @@ def flow_to_hsv(flow):
 
 ---
 
-## 4. Motion Detection from Flow
+## 4. Phát Hiện Chuyển Động Từ Flow
 
-### A. Magnitude Threshold
+### A. Ngưỡng Độ Lớn
 
 ```python
 def detect_motion_from_flow(flow, threshold=2.0):
-    """Detect motion from optical flow"""
-    # Calculate magnitude
+    """Phát hiện chuyển động từ optical flow"""
+    # Tính độ lớn
     fx, fy = flow[:, :, 0], flow[:, :, 1]
     magnitude = np.sqrt(fx**2 + fy**2)
 
-    # Threshold
+    # Ngưỡng
     motion_mask = (magnitude > threshold).astype(np.uint8) * 255
 
     return motion_mask
 ```
 
-### B. Direction Filtering
+### B. Lọc Theo Hướng
 
 ```python
 def detect_motion_by_direction(flow, direction='right', threshold=2.0):
-    """Detect motion in specific direction"""
+    """Phát hiện chuyển động theo hướng cụ thể"""
     fx, fy = flow[:, :, 0], flow[:, :, 1]
     magnitude = np.sqrt(fx**2 + fy**2)
 
-    # Calculate angle
+    # Tính góc
     angle = np.arctan2(fy, fx) * 180 / np.pi
 
-    # Direction ranges (degrees)
+    # Phạm vi hướng (độ)
     directions = {
         'right': (- 45, 45),
         'down': (45, 135),
@@ -328,7 +328,7 @@ def detect_motion_by_direction(flow, direction='right', threshold=2.0):
         'up': (-135, -45)
     }
 
-    # Filter by direction
+    # Lọc theo hướng
     if direction in directions:
         min_ang, max_ang = directions[direction]
         direction_mask = (angle >= min_ang) & (angle <= max_ang)
@@ -342,13 +342,13 @@ def detect_motion_by_direction(flow, direction='right', threshold=2.0):
 
 ---
 
-## 5. Applications
+## 5. Ứng Dụng
 
-### A. Object Tracking
+### A. Theo Dõi Vật Thể
 
 ```python
 class OpticalFlowTracker:
-    """Track object using optical flow"""
+    """Theo dõi vật thể sử dụng optical flow"""
 
     def __init__(self):
         self.feature_params = dict(
@@ -368,11 +368,11 @@ class OpticalFlowTracker:
         self.track_len = 10
 
     def update(self, frame, roi=None):
-        """Update tracking with new frame"""
+        """Cập nhật theo dõi với frame mới"""
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         if len(self.tracks) > 0:
-            # Calculate optical flow
+            # Tính optical flow
             img0, img1 = self.prev_gray, gray
             p0 = np.float32([tr[-1] for tr in self.tracks]).reshape(-1, 1, 2)
 
@@ -418,15 +418,15 @@ class OpticalFlowTracker:
         return self.tracks
 
     def draw_tracks(self, frame):
-        """Draw tracks on frame"""
+        """Vẽ quỹ đạo lên frame"""
         vis = frame.copy()
 
         for tr in self.tracks:
-            # Draw trail
+            # Vẽ trail
             pts = np.int32(tr)
             cv2.polylines(vis, [pts], False, (0, 255, 0))
 
-            # Draw current point
+            # Vẽ current point
             if len(tr) > 0:
                 x, y = np.int32(tr[-1])
                 cv2.circle(vis, (x, y), 2, (0, 0, 255), -1)
@@ -434,23 +434,23 @@ class OpticalFlowTracker:
         return vis
 ```
 
-### B. Motion Segmentation
+### B. Phân Vùng Chuyển Động
 
 ```python
 def segment_moving_objects(flow, threshold=2.0, min_area=500):
-    """Segment moving objects from flow"""
-    # Get motion mask
+    """Phân vùng vật thể chuyển động từ flow"""
+    # Lấy motion mask
     motion_mask = detect_motion_from_flow(flow, threshold)
 
-    # Morphology
+    # Phép toán hình thái
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_OPEN, kernel)
     motion_mask = cv2.morphologyEx(motion_mask, cv2.MORPH_CLOSE, kernel)
 
-    # Find contours
+    # Tìm contours
     contours, _ = cv2.findContours(motion_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Filter by area
+    # Lọc theo diện tích
     objects = []
     for contour in contours:
         if cv2.contourArea(contour) >= min_area:
@@ -462,7 +462,7 @@ def segment_moving_objects(flow, threshold=2.0, min_area=500):
 
 ---
 
-## 6. Comparison: Lucas-Kanade vs Farneback
+## 6. So Sánh: Lucas-Kanade vs Farneback
 
 | Aspect | Lucas-Kanade | Farneback |
 |--------|--------------|-----------|
@@ -473,55 +473,55 @@ def segment_moving_objects(flow, threshold=2.0, min_area=500):
 | Use Case | Tracking specific points | Motion fields |
 | Memory | Low ✅ | High ⚠️ |
 
-**When to use:**
+**Khi nào dùng:**
 
 **Lucas-Kanade:**
-- Track specific objects
-- Real-time performance needed
-- Sparse motion information sufficient
+- Theo dõi vật thể cụ thể
+- Cần hiệu năng thời gian thực
+- Thông tin chuyển động thưa là đủ
 
 **Farneback:**
-- Need complete motion field
-- Motion segmentation
-- Visual effects / analysis
+- Cần trường chuyển động đầy đủ
+- Phân vùng chuyển động
+- Hiệu ứng hình ảnh / phân tích
 
 ---
 
-## 7. Performance Optimization
+## 7. Tối Ưu Hiệu Năng
 
-### A. Reduce Resolution
+### A. Giảm Độ Phân Giải
 
 ```python
-# Downsample for optical flow
+# Giảm mẫu cho optical flow
 scale = 0.5
 small_prev = cv2.resize(prev_gray, None, fx=scale, fy=scale)
 small_curr = cv2.resize(curr_gray, None, fx=scale, fy=scale)
 
-# Calculate flow on small images
+# Tính flow on small images
 flow = cv2.calcOpticalFlowFarneback(small_prev, small_curr, None, ...)
 
-# Scale flow back
+# Scale flow trở lại
 flow = flow / scale
 flow = cv2.resize(flow, (curr_gray.shape[1], curr_gray.shape[0]))
 ```
 
-### B. ROI Processing
+### B. Xử Lý ROI
 
 ```python
-# Define ROI
+# Định nghĩa ROI
 x, y, w, h = 100, 100, 400, 300
 
 roi_prev = prev_gray[y:y+h, x:x+w]
 roi_curr = curr_gray[y:y+h, x:x+w]
 
-# Calculate flow in ROI only
+# Tính flow chỉ trong ROI
 flow_roi = cv2.calcOpticalFlowFarneback(roi_prev, roi_curr, None, ...)
 ```
 
-### C. Frame Skipping
+### C. Bỏ Qua Frames
 
 ```python
-# Calculate flow every N frames
+# Tính flow mỗi N frames
 frame_count = 0
 flow_every_n = 3
 cached_flow = None
@@ -538,7 +538,7 @@ while True:
         if prev_gray is not None:
             cached_flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, ...)
 
-    # Use cached flow
+    # Dùng flow đã cache
     if cached_flow is not None:
         # Process with cached_flow
         pass
@@ -548,9 +548,9 @@ while True:
 
 ---
 
-## 8. Limitations
+## 8. Hạn Chế
 
-### A. Brightness Constancy Violation
+### A. Vi Phạm Độ Sáng Không Đổi
 
 **Problem:**
 - Lighting changes
@@ -559,20 +559,20 @@ while True:
 
 **Solution:**
 ```python
-# Normalize illumination
+# Chuẩn hóa độ chiếu sáng
 prev_normalized = cv2.equalizeHist(prev_gray)
 curr_normalized = cv2.equalizeHist(curr_gray)
 
 flow = cv2.calcOpticalFlowFarneback(prev_normalized, curr_normalized, ...)
 ```
 
-### B. Large Motion
+### B. Chuyển Động Lớn
 
 **Problem:** Assumptions break down with large displacements
 
 **Solution:**
 ```python
-# Use more pyramid levels
+# Dùng nhiều cấp pyramid hơn
 flow = cv2.calcOpticalFlowFarneback(
     prev_gray,
     curr_gray,
@@ -583,39 +583,39 @@ flow = cv2.calcOpticalFlowFarneback(
 )
 ```
 
-### C. Motion Boundaries
+### C. Ranh Giới Chuyển Động
 
 **Problem:** Inaccurate at object boundaries
 
 **Solution:**
 ```python
-# Use smaller window size at boundaries
-# Or use edge-aware optical flow (advanced)
+# Dùng kích thước cửa sổ nhỏ hơn tại ranh giới
+# Hoặc dùng optical flow nhận biết cạnh (nâng cao)
 ```
 
 ---
 
-## 9. Advanced: DIS Optical Flow
+## 9. Nâng Cao: DIS Optical Flow
 
-### A. Dense Inverse Search
+### A. Tìm Kiếm Nghịch Đảo Dày Đặc
 
 ```python
-# Create DIS optical flow
+# Tạo DIS optical flow
 dis = cv2.DISOpticalFlow_create(cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
 
-# Calculate flow
+# Tính flow
 flow = dis.calc(prev_gray, curr_gray, None)
 
-# Presets:
+# Các preset:
 # - DISOPTICAL_FLOW_PRESET_ULTRAFAST
 # - DISOPTICAL_FLOW_PRESET_FAST
 # - DISOPTICAL_FLOW_PRESET_MEDIUM (recommended)
 ```
 
-**Advantages:**
-- Faster than Farneback
-- Better at preserving boundaries
-- Good accuracy
+**Ưu điểm:**
+- Nhanh hơn Farneback
+- Tốt hơn trong việc giữ ranh giới
+- Độ chính xác tốt
 
 ---
 

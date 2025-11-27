@@ -1,13 +1,13 @@
-# Contour Analysis
+# Contour Analysis (Phân Tích Đường Viền)
 
 ## 1. Khái Niệm
 
-**Contour** là curve nối các điểm liên tục có cùng color hoặc intensity. Trong context của OpenCV, contours là đường biên của objects.
+**Contour (đường viền)** là đường cong nối các điểm liên tục có cùng màu sắc hoặc cường độ sáng. Trong ngữ cảnh của OpenCV, contours là đường biên của các đối tượng.
 
-### A. Definition
+### A. Định Nghĩa
 
 ```python
-# Contour: List of points defining boundary
+# Contour: Danh sách các điểm định nghĩa ranh giới
 contour = np.array([
     [[100, 100]],
     [[150, 100]],
@@ -18,97 +18,97 @@ contour = np.array([
 
 ---
 
-## 2. Finding Contours
+## 2. Tìm Đường Viền
 
-### A. Basic Usage
+### A. Sử Dụng Cơ Bản
 
 ```python
 import cv2
 import numpy as np
 
-# Read and prepare image
+# Đọc và chuẩn bị ảnh
 image = cv2.imread('image.jpg')
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Threshold to get binary image
+# Ngưỡng hóa để có ảnh nhị phân
 _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
-# Find contours
+# Tìm đường viền
 contours, hierarchy = cv2.findContours(
     binary,
-    cv2.RETR_EXTERNAL,        # Retrieval mode
-    cv2.CHAIN_APPROX_SIMPLE   # Approximation method
+    cv2.RETR_EXTERNAL,        # Chế độ truy xuất
+    cv2.CHAIN_APPROX_SIMPLE   # Phương pháp xấp xỉ
 )
 
-print(f"Found {len(contours)} contours")
+print(f"Tìm thấy {len(contours)} đường viền")
 ```
 
-### B. Retrieval Modes
+### B. Chế Độ Truy Xuất
 
 ```python
-# RETR_EXTERNAL: Only outermost contours
+# RETR_EXTERNAL: Chỉ lấy đường viền ngoài cùng
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-# RETR_LIST: All contours, no hierarchy
+# RETR_LIST: Tất cả đường viền, không có phân cấp
 contours, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
-# RETR_TREE: All contours with full hierarchy
+# RETR_TREE: Tất cả đường viền với phân cấp đầy đủ
 contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-# RETR_CCOMP: Two-level hierarchy
+# RETR_CCOMP: Phân cấp 2 mức
 contours, hierarchy = cv2.findContours(binary, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 ```
 
-**Hierarchy Format:**
+**Định Dạng Hierarchy (Phân Cấp):**
 ```
 hierarchy[i] = [next, previous, first_child, parent]
 ```
 
-### C. Approximation Methods
+### C. Phương Pháp Xấp Xỉ
 
 ```python
-# CHAIN_APPROX_NONE: Store all points
+# CHAIN_APPROX_NONE: Lưu tất cả các điểm
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-print(f"Points: {len(contours[0])}")  # Many points
+print(f"Điểm: {len(contours[0])}")  # Nhiều điểm
 
-# CHAIN_APPROX_SIMPLE: Store only corner points (recommended)
+# CHAIN_APPROX_SIMPLE: Chỉ lưu điểm góc (khuyến nghị)
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-print(f"Points: {len(contours[0])}")  # Fewer points
+print(f"Điểm: {len(contours[0])}")  # Ít điểm hơn
 ```
 
 ---
 
-## 3. Drawing Contours
+## 3. Vẽ Đường Viền
 
-### A. Basic Drawing
+### A. Vẽ Cơ Bản
 
 ```python
-# Draw all contours
+# Vẽ tất cả đường viền
 result = image.copy()
 cv2.drawContours(result, contours, -1, (0, 255, 0), 2)
 
-# Draw specific contour
-cv2.drawContours(result, contours, 0, (0, 255, 0), 2)  # First contour
+# Vẽ đường viền cụ thể
+cv2.drawContours(result, contours, 0, (0, 255, 0), 2)  # Đường viền đầu tiên
 
-# Draw filled
+# Vẽ tô đầy
 cv2.drawContours(result, contours, -1, (0, 255, 0), -1)  # thickness=-1
 ```
 
-### B. Custom Drawing
+### B. Vẽ Tùy Chỉnh
 
 ```python
 def draw_contours_custom(image, contours):
-    """Draw contours with different colors"""
+    """Vẽ đường viền với nhiều màu khác nhau"""
     result = image.copy()
 
     for i, contour in enumerate(contours):
-        # Random color for each contour
+        # Màu ngẫu nhiên cho mỗi đường viền
         color = np.random.randint(0, 255, 3).tolist()
 
-        # Draw contour
+        # Vẽ đường viền
         cv2.drawContours(result, [contour], -1, color, 2)
 
-        # Draw contour index
+        # Vẽ chỉ số đường viền
         M = cv2.moments(contour)
         if M["m00"] != 0:
             cx = int(M["m10"] / M["m00"])
@@ -121,56 +121,56 @@ def draw_contours_custom(image, contours):
 
 ---
 
-## 4. Contour Properties
+## 4. Thuộc Tính Đường Viền
 
-### A. Area
+### A. Diện Tích
 
 ```python
 for contour in contours:
     area = cv2.contourArea(contour)
-    print(f"Area: {area} pixels²")
+    print(f"Diện tích: {area} pixels²")
 ```
 
-### B. Perimeter
+### B. Chu Vi
 
 ```python
 for contour in contours:
-    # Closed contour
+    # Đường viền đóng
     perimeter = cv2.arcLength(contour, closed=True)
-    print(f"Perimeter: {perimeter} pixels")
+    print(f"Chu vi: {perimeter} pixels")
 
-    # Open contour
+    # Đường viền mở
     perimeter_open = cv2.arcLength(contour, closed=False)
 ```
 
-### C. Bounding Rectangle
+### C. Bounding Rectangle (Hình Chữ Nhật Bao)
 
 ```python
 for contour in contours:
-    # Straight bounding rectangle
+    # Hình chữ nhật bao thẳng
     x, y, w, h = cv2.boundingRect(contour)
     cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     print(f"BBox: ({x}, {y}, {w}, {h})")
 ```
 
-### D. Rotated Rectangle
+### D. Rotated Rectangle (Hình Chữ Nhật Xoay)
 
 ```python
 for contour in contours:
-    # Minimum area rectangle (can be rotated)
+    # Hình chữ nhật diện tích tối thiểu (có thể xoay)
     rect = cv2.minAreaRect(contour)
     # rect = ((center_x, center_y), (width, height), angle)
 
-    # Get box points
+    # Lấy tọa độ các điểm góc
     box = cv2.boxPoints(rect)
     box = np.int0(box)
 
-    # Draw
+    # Vẽ
     cv2.drawContours(image, [box], 0, (0, 0, 255), 2)
 ```
 
-### E. Minimum Enclosing Circle
+### E. Minimum Enclosing Circle (Hình Tròn Bao Nhỏ Nhất)
 
 ```python
 for contour in contours:
@@ -181,7 +181,7 @@ for contour in contours:
     cv2.circle(image, center, radius, (255, 0, 0), 2)
 ```
 
-### F. Centroid (Center of Mass)
+### F. Centroid (Trọng Tâm)
 
 ```python
 for contour in contours:
@@ -192,114 +192,114 @@ for contour in contours:
         cy = int(M["m01"] / M["m00"])
 
         cv2.circle(image, (cx, cy), 5, (255, 0, 0), -1)
-        print(f"Centroid: ({cx}, {cy})")
+        print(f"Trọng tâm: ({cx}, {cy})")
 ```
 
-### G. Convex Hull
+### G. Convex Hull (Bao Lồi)
 
 ```python
 for contour in contours:
     hull = cv2.convexHull(contour)
 
-    # Draw hull
+    # Vẽ bao lồi
     cv2.drawContours(image, [hull], 0, (0, 255, 255), 2)
 ```
 
 ---
 
-## 5. Contour Approximation
+## 5. Xấp Xỉ Đường Viền
 
-### A. Douglas-Peucker Algorithm
+### A. Thuật Toán Douglas-Peucker
 
 ```python
 for contour in contours:
-    # Approximate contour with fewer points
+    # Xấp xỉ đường viền với ít điểm hơn
     epsilon = 0.01 * cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, epsilon, True)
 
-    print(f"Original points: {len(contour)}")
-    print(f"Approximated points: {len(approx)}")
+    print(f"Điểm ban đầu: {len(contour)}")
+    print(f"Điểm xấp xỉ: {len(approx)}")
 
-    # Draw approximation
+    # Vẽ xấp xỉ
     cv2.drawContours(image, [approx], 0, (0, 255, 0), 2)
 ```
 
-**Epsilon Parameter:**
+**Tham Số Epsilon:**
 ```python
-# Small epsilon: More detailed (more points)
+# Epsilon nhỏ: Chi tiết hơn (nhiều điểm)
 epsilon = 0.001 * cv2.arcLength(contour, True)
 
-# Medium epsilon: Balanced (recommended)
+# Epsilon trung bình: Cân bằng (khuyến nghị)
 epsilon = 0.01 * cv2.arcLength(contour, True)
 
-# Large epsilon: Simple (fewer points)
+# Epsilon lớn: Đơn giản (ít điểm)
 epsilon = 0.1 * cv2.arcLength(contour, True)
 ```
 
-### B. Shape Detection
+### B. Nhận Dạng Hình Dạng
 
 ```python
 def detect_shape(contour):
-    """Detect shape from contour"""
+    """Nhận dạng hình dạng từ đường viền"""
 
-    # Approximate
+    # Xấp xỉ
     epsilon = 0.04 * cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, epsilon, True)
 
-    # Number of vertices
+    # Số đỉnh
     vertices = len(approx)
 
     if vertices == 3:
-        return "Triangle"
+        return "Tam giác"
     elif vertices == 4:
-        # Check if square or rectangle
+        # Kiểm tra hình vuông hay chữ nhật
         x, y, w, h = cv2.boundingRect(approx)
         aspect_ratio = float(w) / h
 
         if 0.95 <= aspect_ratio <= 1.05:
-            return "Square"
+            return "Hình vuông"
         else:
-            return "Rectangle"
+            return "Hình chữ nhật"
     elif vertices == 5:
-        return "Pentagon"
+        return "Ngũ giác"
     elif vertices > 5:
-        # Check if circle
+        # Kiểm tra hình tròn
         area = cv2.contourArea(contour)
         (x, y), radius = cv2.minEnclosingCircle(contour)
         circle_area = np.pi * radius ** 2
 
         if abs(area - circle_area) / circle_area < 0.2:
-            return "Circle"
+            return "Hình tròn"
         else:
-            return "Ellipse"
+            return "Hình elip"
     else:
-        return "Unknown"
+        return "Không xác định"
 ```
 
 ---
 
-## 6. Contour Features
+## 6. Đặc Trưng Đường Viền
 
-### A. Aspect Ratio
+### A. Aspect Ratio (Tỷ Lệ Khung Hình)
 
 ```python
 x, y, w, h = cv2.boundingRect(contour)
 aspect_ratio = float(w) / h
 
-print(f"Aspect Ratio: {aspect_ratio}")
+print(f"Tỷ lệ khung hình: {aspect_ratio}")
 
-# Classification
+# Phân loại
 if aspect_ratio > 2:
-    print("Horizontal object")
+    print("Đối tượng ngang")
 elif aspect_ratio < 0.5:
-    print("Vertical object")
+    print("Đối tượng dọc")
 else:
-    print("Balanced object")
+    print("Đối tượng cân bằng")
 ```
 
-### B. Extent
+### B. Extent (Độ Mở Rộng)
 
-**Extent** = Contour Area / Bounding Rectangle Area
+**Extent** = Diện tích đường viền / Diện tích hình chữ nhật bao
 
 ```python
 area = cv2.contourArea(contour)
@@ -309,15 +309,15 @@ extent = float(area) / rect_area
 
 print(f"Extent: {extent:.2f}")
 
-# Interpretation:
-# extent ≈ 1.0: Fills bounding box (rectangle)
-# extent ≈ 0.79: Circle (π/4)
-# extent < 0.5: Irregular shape
+# Giải thích:
+# extent ≈ 1.0: Lấp đầy hộp bao (hình chữ nhật)
+# extent ≈ 0.79: Hình tròn (π/4)
+# extent < 0.5: Hình dạng không đều
 ```
 
-### C. Solidity
+### C. Solidity (Độ Đặc)
 
-**Solidity** = Contour Area / Convex Hull Area
+**Solidity** = Diện tích đường viền / Diện tích bao lồi
 
 ```python
 area = cv2.contourArea(contour)
@@ -327,43 +327,43 @@ solidity = float(area) / hull_area if hull_area > 0 else 0
 
 print(f"Solidity: {solidity:.2f}")
 
-# Interpretation:
-# solidity ≈ 1.0: Convex shape
-# solidity < 0.8: Has concavities
+# Giải thích:
+# solidity ≈ 1.0: Hình lồi
+# solidity < 0.8: Có lõm
 ```
 
-### D. Equivalent Diameter
+### D. Equivalent Diameter (Đường Kính Tương Đương)
 
 ```python
 area = cv2.contourArea(contour)
 equi_diameter = np.sqrt(4 * area / np.pi)
 
-print(f"Equivalent Diameter: {equi_diameter:.2f} pixels")
+print(f"Đường kính tương đương: {equi_diameter:.2f} pixels")
 ```
 
-### E. Orientation
+### E. Orientation (Hướng)
 
 ```python
-# Fit ellipse (requires at least 5 points)
+# Khớp elip (yêu cầu ít nhất 5 điểm)
 if len(contour) >= 5:
     ellipse = cv2.fitEllipse(contour)
     (x, y), (MA, ma), angle = ellipse
 
-    print(f"Orientation: {angle:.2f} degrees")
+    print(f"Hướng: {angle:.2f} độ")
 
-    # Draw ellipse
+    # Vẽ elip
     cv2.ellipse(image, ellipse, (0, 255, 0), 2)
 ```
 
 ---
 
-## 7. Contour Filtering
+## 7. Lọc Đường Viền
 
-### A. By Area
+### A. Theo Diện Tích
 
 ```python
 def filter_by_area(contours, min_area=500, max_area=50000):
-    """Filter contours by area"""
+    """Lọc đường viền theo diện tích"""
     filtered = []
 
     for contour in contours:
@@ -373,15 +373,15 @@ def filter_by_area(contours, min_area=500, max_area=50000):
 
     return filtered
 
-# Usage
+# Sử dụng
 large_contours = filter_by_area(contours, min_area=1000)
 ```
 
-### B. By Shape
+### B. Theo Hình Dạng
 
 ```python
 def filter_by_aspect_ratio(contours, min_ratio=0.5, max_ratio=2.0):
-    """Filter contours by aspect ratio"""
+    """Lọc đường viền theo tỷ lệ khung hình"""
     filtered = []
 
     for contour in contours:
@@ -393,15 +393,15 @@ def filter_by_aspect_ratio(contours, min_ratio=0.5, max_ratio=2.0):
 
     return filtered
 
-# Example: Filter vertical objects (people, poles)
+# Ví dụ: Lọc đối tượng dọc (người, cột)
 vertical_contours = filter_by_aspect_ratio(contours, min_ratio=0.3, max_ratio=0.8)
 ```
 
-### C. By Solidity
+### C. Theo Solidity
 
 ```python
 def filter_by_solidity(contours, min_solidity=0.8):
-    """Filter out contours with holes/concavities"""
+    """Lọc bỏ đường viền có lỗ/lõm"""
     filtered = []
 
     for contour in contours:
@@ -416,15 +416,15 @@ def filter_by_solidity(contours, min_solidity=0.8):
 
     return filtered
 
-# Filter compact shapes only
+# Lọc chỉ hình dạng đặc
 compact_contours = filter_by_solidity(contours, min_solidity=0.9)
 ```
 
-### D. Combined Filtering
+### D. Lọc Kết Hợp
 
 ```python
 class ContourFilter:
-    """Filter contours by multiple criteria"""
+    """Lọc đường viền theo nhiều tiêu chí"""
 
     def __init__(self, min_area=500, max_area=50000,
                  min_aspect=0.3, max_aspect=3.0,
@@ -436,7 +436,7 @@ class ContourFilter:
         self.min_solidity = min_solidity
 
     def filter(self, contours):
-        """Apply all filters"""
+        """Áp dụng tất cả bộ lọc"""
         filtered = []
 
         for contour in contours:
@@ -446,14 +446,14 @@ class ContourFilter:
         return filtered
 
     def _meets_criteria(self, contour):
-        """Check if contour meets all criteria"""
+        """Kiểm tra đường viền đáp ứng tất cả tiêu chí"""
 
-        # Area
+        # Diện tích
         area = cv2.contourArea(contour)
         if not (self.min_area <= area <= self.max_area):
             return False
 
-        # Aspect ratio
+        # Tỷ lệ khung hình
         x, y, w, h = cv2.boundingRect(contour)
         aspect_ratio = float(w) / h
         if not (self.min_aspect <= aspect_ratio <= self.max_aspect):
@@ -470,7 +470,7 @@ class ContourFilter:
         return True
 
 
-# Usage
+# Sử dụng
 filter = ContourFilter(min_area=1000, max_area=10000,
                         min_aspect=0.5, max_aspect=2.0,
                         min_solidity=0.8)
@@ -480,39 +480,39 @@ filtered_contours = filter.filter(contours)
 
 ---
 
-## 8. Contour Matching
+## 8. Khớp Đường Viền
 
-### A. Shape Matching
+### A. Khớp Hình Dạng
 
 ```python
-# Template contour
+# Đường viền mẫu
 template = contours[0]
 
-# Compare with other contours
+# So sánh với các đường viền khác
 for i, contour in enumerate(contours[1:], 1):
     match = cv2.matchShapes(template, contour, cv2.CONTOURS_MATCH_I1, 0)
 
-    print(f"Contour {i}: match = {match:.4f}")
+    print(f"Đường viền {i}: khớp = {match:.4f}")
 
-    # Low value = good match
+    # Giá trị thấp = khớp tốt
     if match < 0.1:
-        print(f"  → Similar to template!")
+        print(f"  → Tương tự mẫu!")
 ```
 
-**Match Methods:**
-- `CONTOURS_MATCH_I1`: Hu moments method 1
-- `CONTOURS_MATCH_I2`: Hu moments method 2
-- `CONTOURS_MATCH_I3`: Hu moments method 3
+**Phương Pháp Khớp:**
+- `CONTOURS_MATCH_I1`: Phương pháp Hu moments 1
+- `CONTOURS_MATCH_I2`: Phương pháp Hu moments 2
+- `CONTOURS_MATCH_I3`: Phương pháp Hu moments 3
 
 ---
 
-## 9. Hierarchy Analysis
+## 9. Phân Tích Phân Cấp
 
-### A. Parent-Child Relationship
+### A. Quan Hệ Cha-Con
 
 ```python
 def analyze_hierarchy(contours, hierarchy):
-    """Analyze contour hierarchy"""
+    """Phân tích phân cấp đường viền"""
 
     # hierarchy[i] = [next, previous, first_child, parent]
 
@@ -522,22 +522,22 @@ def analyze_hierarchy(contours, hierarchy):
 
         area = cv2.contourArea(contour)
 
-        print(f"Contour {i}:")
-        print(f"  Area: {area}")
-        print(f"  Parent: {parent_idx}")
-        print(f"  First Child: {child_idx}")
+        print(f"Đường viền {i}:")
+        print(f"  Diện tích: {area}")
+        print(f"  Cha: {parent_idx}")
+        print(f"  Con đầu: {child_idx}")
 
         if parent_idx == -1:
-            print(f"  → Outer contour")
+            print(f"  → Đường viền ngoài")
         else:
-            print(f"  → Inner contour (hole)")
+            print(f"  → Đường viền trong (lỗ)")
 ```
 
-### B. Detect Objects with Holes
+### B. Phát Hiện Đối Tượng Có Lỗ
 
 ```python
 def find_objects_with_holes(contours, hierarchy):
-    """Find contours that contain holes"""
+    """Tìm đường viền chứa lỗ"""
 
     objects_with_holes = []
 
@@ -545,7 +545,7 @@ def find_objects_with_holes(contours, hierarchy):
         h = hierarchy[0][i]
         child_idx = h[2]
 
-        # Has child = has hole
+        # Có con = có lỗ
         if child_idx != -1:
             objects_with_holes.append((i, contour))
 
@@ -554,29 +554,29 @@ def find_objects_with_holes(contours, hierarchy):
 
 ---
 
-## 10. Advanced Analysis
+## 10. Phân Tích Nâng Cao
 
-### A. Contour Moments
+### A. Contour Moments (Mô-men Đường Viền)
 
 ```python
 def analyze_moments(contour):
-    """Analyze contour using moments"""
+    """Phân tích đường viền sử dụng mô-men"""
 
     M = cv2.moments(contour)
 
-    # Central moments
+    # Mô-men trung tâm
     mu20 = M['mu20']
     mu02 = M['mu02']
     mu11 = M['mu11']
 
-    # Orientation
+    # Hướng
     if (mu20 - mu02) != 0:
         theta = 0.5 * np.arctan(2 * mu11 / (mu20 - mu02))
         orientation = np.degrees(theta)
     else:
         orientation = 0
 
-    # Eccentricity
+    # Độ lệch tâm
     if M['m00'] > 0:
         a = mu20 / M['m00']
         b = mu02 / M['m00']
@@ -593,50 +593,50 @@ def analyze_moments(contour):
     }
 ```
 
-### B. Hu Moments (Shape Descriptor)
+### B. Hu Moments (Mô Tả Hình Dạng)
 
 ```python
 def calculate_hu_moments(contour):
-    """Calculate Hu moments for shape recognition"""
+    """Tính Hu moments để nhận dạng hình dạng"""
 
     M = cv2.moments(contour)
     hu_moments = cv2.HuMoments(M)
 
-    # Log transform for better range
+    # Biến đổi log để có phạm vi tốt hơn
     hu_moments = -np.sign(hu_moments) * np.log10(np.abs(hu_moments))
 
     return hu_moments.flatten()
 
-# Compare shapes
+# So sánh hình dạng
 hu1 = calculate_hu_moments(contour1)
 hu2 = calculate_hu_moments(contour2)
 
 distance = np.linalg.norm(hu1 - hu2)
-print(f"Shape difference: {distance}")
+print(f"Khác biệt hình dạng: {distance}")
 ```
 
 ---
 
-## 11. Contour Convexity
+## 11. Độ Lồi Đường Viền
 
-### A. Check Convexity
+### A. Kiểm Tra Độ Lồi
 
 ```python
 is_convex = cv2.isContourConvex(contour)
 
 if is_convex:
-    print("Contour is convex")
+    print("Đường viền lồi")
 else:
-    print("Contour has concavities")
+    print("Đường viền có lõm")
 ```
 
-### B. Convexity Defects
+### B. Convexity Defects (Khuyết Lồi)
 
 ```python
-# Get hull indices
+# Lấy chỉ số bao lồi
 hull = cv2.convexHull(contour, returnPoints=False)
 
-# Calculate defects
+# Tính khuyết
 defects = cv2.convexityDefects(contour, hull)
 
 if defects is not None:
@@ -647,42 +647,42 @@ if defects is not None:
         end = tuple(contour[e][0])
         far = tuple(contour[f][0])
 
-        # d is distance from farthest point to hull (in 1/256 pixels)
+        # d là khoảng cách từ điểm xa nhất tới bao lồi (trong 1/256 pixels)
         depth = d / 256.0
 
-        # Draw defects
+        # Vẽ khuyết
         cv2.line(image, start, end, (0, 255, 0), 2)
         cv2.circle(image, far, 5, (0, 0, 255), -1)
 
-        print(f"Defect depth: {depth:.2f}")
+        print(f"Độ sâu khuyết: {depth:.2f}")
 ```
 
 ---
 
-## 12. Complete Example
+## 12. Ví Dụ Hoàn Chỉnh
 
 ```python
 class ContourAnalyzer:
-    """Comprehensive contour analysis"""
+    """Phân tích đường viền toàn diện"""
 
     def __init__(self, min_area=500):
         self.min_area = min_area
 
     def analyze(self, image):
-        """Analyze all contours in image"""
+        """Phân tích tất cả đường viền trong ảnh"""
 
-        # Prepare image
+        # Chuẩn bị ảnh
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
-        # Find contours
+        # Tìm đường viền
         contours, hierarchy = cv2.findContours(
             binary,
             cv2.RETR_TREE,
             cv2.CHAIN_APPROX_SIMPLE
         )
 
-        # Analyze each contour
+        # Phân tích từng đường viền
         results = []
 
         for i, contour in enumerate(contours):
@@ -691,7 +691,7 @@ class ContourAnalyzer:
             if area < self.min_area:
                 continue
 
-            # Calculate properties
+            # Tính các thuộc tính
             props = self._calculate_properties(contour)
             props['id'] = i
             props['contour'] = contour
@@ -701,16 +701,16 @@ class ContourAnalyzer:
         return results
 
     def _calculate_properties(self, contour):
-        """Calculate all contour properties"""
+        """Tính tất cả thuộc tính đường viền"""
 
-        # Basic properties
+        # Thuộc tính cơ bản
         area = cv2.contourArea(contour)
         perimeter = cv2.arcLength(contour, True)
 
-        # Bounding box
+        # Hộp bao
         x, y, w, h = cv2.boundingRect(contour)
 
-        # Centroid
+        # Trọng tâm
         M = cv2.moments(contour)
         if M["m00"] != 0:
             cx = int(M["m10"] / M["m00"])
@@ -718,7 +718,7 @@ class ContourAnalyzer:
         else:
             cx, cy = 0, 0
 
-        # Aspect ratio
+        # Tỷ lệ khung hình
         aspect_ratio = float(w) / h if h > 0 else 0
 
         # Extent
@@ -730,7 +730,7 @@ class ContourAnalyzer:
         hull_area = cv2.contourArea(hull)
         solidity = float(area) / hull_area if hull_area > 0 else 0
 
-        # Shape
+        # Hình dạng
         shape = detect_shape(contour)
 
         return {
@@ -745,7 +745,7 @@ class ContourAnalyzer:
         }
 
     def visualize(self, image, results):
-        """Visualize analysis results"""
+        """Trực quan hóa kết quả phân tích"""
 
         vis = image.copy()
 
@@ -754,16 +754,16 @@ class ContourAnalyzer:
             x, y, w, h = props['bbox']
             cx, cy = props['centroid']
 
-            # Draw contour
+            # Vẽ đường viền
             cv2.drawContours(vis, [contour], 0, (0, 255, 0), 2)
 
-            # Draw bounding box
+            # Vẽ hộp bao
             cv2.rectangle(vis, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-            # Draw centroid
+            # Vẽ trọng tâm
             cv2.circle(vis, (cx, cy), 5, (0, 0, 255), -1)
 
-            # Add label
+            # Thêm nhãn
             label = f"{props['shape']} ({props['area']:.0f})"
             cv2.putText(vis, label, (x, y - 10),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
@@ -771,23 +771,23 @@ class ContourAnalyzer:
         return vis
 
 
-# Usage
+# Sử dụng
 analyzer = ContourAnalyzer(min_area=500)
 
-# Analyze
+# Phân tích
 results = analyzer.analyze(image)
 
-# Print results
+# In kết quả
 for props in results:
-    print(f"Object {props['id']}:")
-    print(f"  Shape: {props['shape']}")
-    print(f"  Area: {props['area']:.0f}")
-    print(f"  Aspect Ratio: {props['aspect_ratio']:.2f}")
+    print(f"Đối tượng {props['id']}:")
+    print(f"  Hình dạng: {props['shape']}")
+    print(f"  Diện tích: {props['area']:.0f}")
+    print(f"  Tỷ lệ khung hình: {props['aspect_ratio']:.2f}")
     print(f"  Solidity: {props['solidity']:.2f}")
 
-# Visualize
+# Trực quan hóa
 vis = analyzer.visualize(image, results)
-cv2.imshow('Analysis', vis)
+cv2.imshow('Phân tích', vis)
 cv2.waitKey(0)
 ```
 
