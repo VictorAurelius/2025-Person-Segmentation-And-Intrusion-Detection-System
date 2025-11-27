@@ -9,6 +9,7 @@ import logging
 import time
 import sys
 import os
+from datetime import datetime
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -127,8 +128,35 @@ class IntrusionDetectionSystem:
         # Use config defaults if not specified
         if source is None:
             source = self.config['video']['source']
+
+        # Create output directory based on input video name
+        if isinstance(source, str) and not source.isdigit():
+            # Extract video name without extension
+            video_name = os.path.splitext(os.path.basename(source))[0]
+            output_dir = os.path.join("data/output", video_name)
+        else:
+            # For camera source, use timestamp
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            output_dir = os.path.join("data/output", f"camera_{timestamp}")
+
+        # Create output directory
+        os.makedirs(output_dir, exist_ok=True)
+        logging.info(f"Output directory: {output_dir}")
+
+        # Set output paths
         if output_path is None:
-            output_path = self.config['output']['output_path']
+            output_path = os.path.join(output_dir, "result.mp4")
+
+        # Update alert system paths for this video
+        alert_log_path = os.path.join(output_dir, "alerts.log")
+        screenshot_dir = os.path.join(output_dir, "screenshots")
+        os.makedirs(screenshot_dir, exist_ok=True)
+
+        # Reinitialize alert system with new paths
+        self.alert_system.log_file = alert_log_path
+        self.alert_system.screenshot_dir = screenshot_dir
+        self.alert_system.alert_count = 0  # Reset counter
+        self.alert_system._init_log_file()
 
         # Open video source
         if isinstance(source, str) and not source.isdigit():
