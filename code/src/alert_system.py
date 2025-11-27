@@ -38,12 +38,8 @@ class AlertSystem:
         self.save_screenshots = save_screenshots
         self.screenshot_dir = screenshot_dir
 
-        # Create screenshot directory if needed
-        if self.save_screenshots:
-            os.makedirs(screenshot_dir, exist_ok=True)
-
-        # Initialize alert log file
-        self._init_log_file()
+        # Don't create directories/files yet - wait until they're actually needed
+        # This prevents creating empty folders when paths will be updated later
 
         # Alert counter
         self.alert_count = 0
@@ -52,8 +48,7 @@ class AlertSystem:
         self.last_alert_time = {}
         self.alert_cooldown = 2.0  # seconds
 
-        logging.info(f"Initialized alert system: visual={visual}, audio={audio}, "
-                    f"log={log_file}")
+        logging.info(f"Alert system configured: visual={visual}, audio={audio}")
 
     def _init_log_file(self) -> None:
         """Initialize the alert log file."""
@@ -276,6 +271,9 @@ class AlertSystem:
             frame_number: Frame number
         """
         try:
+            # Create screenshot directory if it doesn't exist yet
+            os.makedirs(self.screenshot_dir, exist_ok=True)
+
             filename = f"alert_{self.alert_count:04d}.jpg"
             filepath = os.path.join(self.screenshot_dir, filename)
 
