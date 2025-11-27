@@ -311,4 +311,6 @@ o Đề xuất cải tiến và ứng dụng trong các tình huống thực t�
 
 Lưu ý về hình thức báo cáo:
 1. ngôn từ báo cáo chuyên nghiệp, phong cách viết sinh viên
-2. trả ra dạng md, nhưng không đánh ký hiệu, dạng có thể copy vào word tốt
+2. trả ra dạng md, nhưng không đánh ký hiệu, dạng có thể copy vào word tốt nhất có thể
+3. output có ảnh, hãy ghi rõ các nơi trình bày ảnh và log
+4. đây là plan task cho claude, chưa thực hiện ngay
