@@ -281,3 +281,34 @@ nhưng những tài liệu này đang nửa anh nửa việt
 tôi muốn nó chuyên nghiệp ngôn ngữ:
 + chỉ giữ lại những từ tiếng Anh chuyên nghành và có mở ngoặc giải nghĩa ngay tại đó
 + tất cả các từ không quan trọng chuyển hết sang tiếng việt
+
+tiếp tục sửa tương tự với folder documentation
+
+
+Hãy tạo implementaion-guide/scripts/req-1.md, để tạo báo cáo có nội dung như sau:
+Chương 1: Cơ sở lý Thuyết 
+o Trình bày đầy đủ các khái niệm cơ bản về xử lý ảnh, đặc biệt là phát hiện biên và các phương pháp phát hiện biên (Canny, Sobel, Prewitt).
+o Giải thích nguyên lý hoạt động của từng phương pháp và cách thức áp dụng vào các bài toán trong công nghiệp.
+o Đề cập đến các yếu tố ảnh hưởng đến chất lượng xử lý hình ảnh như độ phân giải, ánh sáng, nhiễu ảnh, v.v.
+
+Lưu ý: chương này cần nói tổng quát nhưng ưu tiên lấy ví dụ vào bài toán đang triển khai (Phân Vùng Người & Phát Hiện Xâm Nhập Khu Vực Cấm)
+
+Chương 2: Cơ sở thực hành
+o Mô tả quy trình thu thập dữ liệu (hình ảnh sản phẩm, điều kiện môi trường, v.v...).
+nói về tiếu chí dữ liệu đang sử dụng, các nguồn dữ liệu, tham khảo 2-data-preparation
+
+o Phân tích các kỹ thuật được áp dụng trong việc xử lý và phát hiện lỗi trên ảnh. => phân tích kỹ các kỹ thuật đang được áp dụng trong code
+
+o Đánh giá kết quả thực nghiệm, so sánh với các phương pháp khác và làm rõ các ưu nhược điểm => phân tích rõ cho bài toán
+CHương 3: Kết luận và Đánh giá:
+o Tóm tắt kết quả đạt được trong việc phát hiện lỗi, đếm số lượng sản phẩm, v.v...
+=> đang có 2 output, phân tích tương ứng (chưa có output cho thiếu sáng và ban đêm (sẽ bỏ sung sau))
+
+o Đánh giá hiệu quả của phương pháp áp dụng và độ chính xác của kết quả. => đánh giá tương ứng
+
+o Đề xuất cải tiến và ứng dụng trong các tình huống thực tế.
+=> cải tiến chủ yếu vào tốc độ frame cần nhận diện nhạy hơn và các tình huống phổ biến
+
+Lưu ý về hình thức báo cáo:
+1. ngôn từ báo cáo chuyên nghiệp, phong cách viết sinh viên
+2. trả ra dạng md, nhưng không đánh ký hiệu, dạng có thể copy vào word tốt
