@@ -54,7 +54,39 @@ python3 --version
 
 ---
 
-## 3. Tạo Virtual Environment
+## 3. Lựa Chọn Môi Trường: Virtual Environment vs WSL
+
+Có hai cách chính để setup môi trường phát triển:
+
+### So Sánh
+
+| Tiêu chí | Virtual Environment | WSL |
+|----------|-------------------|-----|
+| **Isolation** | ✅ Hoàn toàn cô lập | ⚠️ Chia sẻ với system |
+| **Setup** | Phức tạp hơn (activate/deactivate) | Đơn giản hơn |
+| **Performance** | Tốt | Rất tốt (native Linux) |
+| **Disk Space** | Tốn nhiều (mỗi venv ~500MB) | Tiết kiệm |
+| **Multi-project** | ✅ Lý tưởng | ⚠️ Có thể conflict |
+| **Windows** | ✅ Native | ✅ Qua WSL |
+
+### Khuyến Nghị
+
+- **Dùng Virtual Environment nếu:**
+  - Bạn làm việc với nhiều Python projects
+  - Cần isolation hoàn toàn giữa các projects
+  - Muốn dễ dàng share môi trường với người khác
+
+- **Dùng WSL nếu:**
+  - Chỉ làm việc với project này
+  - Muốn setup nhanh, đơn giản
+  - Thích Linux commands
+  - Cần performance tốt hơn cho OpenCV
+
+---
+
+## 4. Setup với Virtual Environment
+
+### Tạo Virtual Environment
 
 ### Tại sao cần Virtual Environment?
 - Cô lập các dependencies của project
@@ -96,7 +128,173 @@ Bạn sẽ thấy `(venv)` ở đầu dòng terminal:
 
 ---
 
-## 4. Cài Đặt Dependencies
+## 5. Setup với WSL (Windows Subsystem for Linux)
+
+### Cài Đặt WSL (nếu chưa có)
+
+#### Bước 1: Enable WSL
+```powershell
+# Chạy PowerShell as Administrator
+wsl --install
+```
+
+Hoặc thủ công:
+```powershell
+# Enable WSL feature
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+# Enable Virtual Machine Platform
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# Restart máy
+```
+
+#### Bước 2: Cài Ubuntu từ Microsoft Store
+1. Mở Microsoft Store
+2. Tìm "Ubuntu" (khuyến nghị Ubuntu 22.04 LTS)
+3. Click "Get" để cài đặt
+4. Launch Ubuntu và tạo username/password
+
+#### Bước 3: Kiểm tra WSL version
+```bash
+wsl --list --verbose
+```
+
+### Setup Python trong WSL
+
+```bash
+# Cập nhật package manager
+sudo apt update && sudo apt upgrade -y
+
+# Cài Python và pip
+sudo apt install -y python3 python3-pip
+
+# Verify
+python3 --version
+pip3 --version
+```
+
+### Navigate đến Project Directory
+
+Windows drives được mount tại `/mnt/`:
+
+```bash
+# Ví dụ: F:\nam4\project\code -> /mnt/f/nam4/project/code
+cd /mnt/f/nam4/2025-Image-Processing-Assignment/2025-Person-Segmentation-And-Intrusion-Detection-System/2025-Person-Segmentation-And-Intrusion-Detection-System/code
+
+# Hoặc tạo symlink cho tiện
+ln -s /mnt/f/nam4/2025-Image-Processing-Assignment/2025-Person-Segmentation-And-Intrusion-Detection-System/2025-Person-Segmentation-And-Intrusion-Detection-System ~/project
+cd ~/project/code
+```
+
+### Cài Dependencies trong WSL
+
+```bash
+# Option 1: Install với pip3 (recommended)
+pip3 install -r requirements.txt
+
+# Option 2: Install với --user flag (nếu không có sudo)
+pip3 install --user -r requirements.txt
+
+# Option 3: Với sudo (không khuyến nghị)
+sudo pip3 install -r requirements.txt
+```
+
+### Verify Installation
+
+```bash
+# Test imports
+python3 -c "import cv2; print(f'OpenCV version: {cv2.__version__}')"
+python3 -c "import numpy; print(f'NumPy version: {numpy.__version__}')"
+python3 -c "import cv2, numpy, yaml, scipy; print('All imports successful!')"
+```
+
+### Chạy Application từ WSL
+
+```bash
+# Chạy main
+python3 src/main.py
+
+# Với options
+python3 src/main.py --source data/input/video.mp4
+python3 src/main.py --debug
+```
+
+### Lưu Ý khi dùng WSL
+
+**✅ Ưu điểm:**
+- Không cần activate/deactivate venv
+- Performance tốt hơn (native Linux)
+- Dễ cài đặt system packages
+- Linux commands quen thuộc
+
+**⚠️ Hạn chế:**
+- GUI display có thể cần setup thêm (X server)
+- File permissions khác Windows
+- Path separators khác (/ thay vì \)
+
+### Setup X Server cho GUI (Optional)
+
+Để hiển thị OpenCV windows trong WSL:
+
+#### Option 1: VcXsrv (Recommended)
+```bash
+# 1. Download và cài VcXsrv: https://sourceforge.net/projects/vcxsrv/
+# 2. Chạy XLaunch với settings:
+#    - Display number: 0
+#    - Disable access control: ✅
+
+# 3. Trong WSL, set DISPLAY
+echo "export DISPLAY=:0" >> ~/.bashrc
+source ~/.bashrc
+
+# 4. Test
+python3 -c "import cv2; cv2.imshow('test', cv2.imread('image.jpg')); cv2.waitKey(0)"
+```
+
+#### Option 2: WSLg (Windows 11)
+WSL 2 trên Windows 11 đã có built-in GUI support:
+```bash
+# Không cần setup gì, chỉ cần update WSL
+wsl --update
+```
+
+### Troubleshooting WSL
+
+#### Lỗi: Cannot open display
+```bash
+# Check DISPLAY variable
+echo $DISPLAY
+
+# Set lại
+export DISPLAY=:0
+
+# Kiểm tra X server đang chạy (Windows)
+```
+
+#### Lỗi: Permission denied khi cài pip
+```bash
+# Dùng --user flag
+pip3 install --user -r requirements.txt
+
+# Hoặc cài pip cho user
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+python3 get-pip.py --user
+```
+
+#### Lỗi: ModuleNotFoundError sau khi cài
+```bash
+# Check xem package được cài ở đâu
+pip3 show opencv-python
+
+# Add vào PATH nếu cần
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+---
+
+## 6. Cài Đặt Dependencies (cho Virtual Environment)
 
 ### Nâng cấp pip
 ```bash
@@ -132,7 +330,7 @@ python -c "import cv2, numpy, yaml, scipy; print('Tất cả imports thành côn
 
 ---
 
-## 5. Cài Đặt IDE (Tùy chọn)
+## 7. Cài Đặt IDE (Tùy chọn)
 
 ### Visual Studio Code
 
@@ -171,7 +369,7 @@ jupyter notebook
 
 ---
 
-## 6. Hỗ Trợ GPU (Tùy chọn)
+## 8. Hỗ Trợ GPU (Tùy chọn)
 
 Để xử lý nhanh hơn với CUDA:
 
@@ -194,7 +392,7 @@ print(cv2.cuda.getCudaEnabledDeviceCount())
 
 ---
 
-## 7. Xử Lý Sự Cố
+## 9. Xử Lý Sự Cố
 
 ### Lỗi: Không tìm thấy lệnh pip
 **Giải pháp:**
@@ -232,8 +430,9 @@ https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 ---
 
-## 8. Checklist Xác Nhận
+## 10. Checklist Xác Nhận
 
+### Cho Virtual Environment:
 - [ ] Python 3.8+ đã được cài đặt
 - [ ] Virtual environment đã được tạo và kích hoạt
 - [ ] Tất cả dependencies đã cài thành công
@@ -241,9 +440,18 @@ https://visualstudio.microsoft.com/visual-cpp-build-tools/
 - [ ] NumPy import không có lỗi
 - [ ] Có thể chạy `python src/main.py --help`
 
+### Cho WSL:
+- [ ] WSL đã được cài đặt và cấu hình
+- [ ] Ubuntu/Linux distribution đã được setup
+- [ ] Python 3.8+ và pip đã được cài trong WSL
+- [ ] Tất cả dependencies đã cài thành công
+- [ ] OpenCV import không có lỗi (test với `python3 -c "import cv2"`)
+- [ ] Có thể navigate đến project directory từ WSL
+- [ ] (Optional) X server được cấu hình cho GUI display
+
 ---
 
-## 9. Kiểm Tra Cấu Trúc Thư Mục
+## 11. Kiểm Tra Cấu Trúc Thư Mục
 
 Xác nhận cấu trúc thư mục của bạn:
 ```bash
@@ -268,7 +476,7 @@ final-project/
 
 ---
 
-## 10. Các Bước Tiếp Theo
+## 12. Các Bước Tiếp Theo
 
 ✅ Môi trường đã sẵn sàng!
 

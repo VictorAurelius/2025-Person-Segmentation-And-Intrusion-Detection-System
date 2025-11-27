@@ -59,6 +59,8 @@ req-4-project/
 
 ### 1. Environment Setup
 
+#### Option A: Virtual Environment (Recommended for isolation)
+
 ```bash
 # Navigate to code directory
 cd req-4-project/code
@@ -75,6 +77,29 @@ venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 ```
+
+#### Option B: WSL (Windows Subsystem for Linux)
+
+```bash
+# Navigate to code directory (in WSL)
+cd /mnt/c/path/to/req-4-project/code
+
+# Install pip if not available
+sudo apt update
+sudo apt install -y python3-pip
+
+# Install dependencies directly
+pip3 install -r requirements.txt
+
+# Or install with --user flag
+pip3 install --user -r requirements.txt
+```
+
+**Advantages of WSL:**
+- No need for virtual environment
+- Better performance for OpenCV
+- Linux-style commands
+- Easier dependency management
 
 ### 2. Prepare Data
 

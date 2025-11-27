@@ -526,6 +526,202 @@ path = "data\\input\\video.mp4"
 
 ---
 
+### WSL (Windows Subsystem for Linux)
+
+#### Lỗi: pip3 not found
+
+**Triệu chứng:**
+```bash
+bash: pip3: command not found
+```
+
+**Giải pháp:**
+```bash
+# Cài pip
+sudo apt update
+sudo apt install -y python3-pip
+
+# Verify
+pip3 --version
+```
+
+---
+
+#### Lỗi: ModuleNotFoundError trong WSL
+
+**Triệu chứng:**
+```python
+ModuleNotFoundError: No module named 'cv2'
+```
+
+**Nguyên nhân:**
+- Package được cài trong ~/.local/bin
+- PATH không include ~/.local/bin
+
+**Giải pháp:**
+```bash
+# Check PATH
+echo $PATH | grep ".local/bin"
+
+# Nếu không có, add vào bashrc
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Reinstall packages
+pip3 install --user -r requirements.txt
+
+# Verify
+python3 -c "import cv2; print('OK')"
+```
+
+---
+
+#### Lỗi: Cannot open display
+
+**Triệu chứng:**
+```
+cv2.error: Can't initialize GTK backend in function 'cvInitSystem'
+```
+
+**Giải pháp:**
+
+**Option 1: Dùng headless mode (Dễ nhất)**
+```bash
+python3 src/main.py --no-display
+```
+
+**Option 2: Setup X Server (Windows 10)**
+```bash
+# 1. Download VcXsrv: https://sourceforge.net/projects/vcxsrv/
+# 2. Chạy XLaunch, settings:
+#    - Display number: 0
+#    - Disable access control: Yes
+
+# 3. Set DISPLAY trong WSL
+export DISPLAY=:0
+
+# 4. Add vào bashrc để permanent
+echo "export DISPLAY=:0" >> ~/.bashrc
+
+# 5. Test
+python3 -c "import cv2; cv2.imshow('test', cv2.imread('test.jpg')); cv2.waitKey(1000)"
+```
+
+**Option 3: WSLg (Windows 11)**
+```bash
+# Update WSL
+wsl --update
+
+# Chạy bình thường, GUI tự động work
+python3 src/main.py
+```
+
+---
+
+#### Lỗi: Permission denied khi access files
+
+**Triệu chứng:**
+```
+PermissionError: [Errno 13] Permission denied: 'data/output/result.mp4'
+```
+
+**Nguyên nhân:**
+- File được tạo bởi Windows với permissions khác
+- WSL user không có quyền write
+
+**Giải pháp:**
+```bash
+# Fix permissions cho folder
+chmod -R 755 data/
+
+# Hoặc chạy với sudo (không khuyến nghị)
+sudo python3 src/main.py
+
+# Best practice: Tạo files trong WSL filesystem
+# Thay vì /mnt/c/..., dùng ~/project/
+```
+
+---
+
+#### Lỗi: Slow performance khi access Windows files
+
+**Triệu chứng:**
+- Chạy rất chậm khi project ở /mnt/c/ hoặc /mnt/f/
+- File I/O lag
+
+**Giải pháp:**
+```bash
+# Copy project vào WSL filesystem (nhanh hơn nhiều)
+cp -r /mnt/f/project ~/project
+cd ~/project/code
+
+# Làm việc trong WSL filesystem
+# Sau đó copy kết quả ra Windows nếu cần
+cp -r ~/project/code/data/output /mnt/f/backup/
+```
+
+---
+
+#### Lỗi: WSL not found hoặc not installed
+
+**Giải pháp:**
+```powershell
+# Chạy PowerShell as Administrator
+wsl --install
+
+# Restart máy
+# Cài Ubuntu từ Microsoft Store
+```
+
+---
+
+#### Lỗi: Video file not found
+
+**Triệu chứng:**
+```
+FileNotFoundError: data/input/video.mp4
+```
+
+**Nguyên nhân:**
+- Path từ Windows khác với WSL
+
+**Giải pháp:**
+```bash
+# Windows path: F:\project\code\data\input\video.mp4
+# WSL path:     /mnt/f/project/code/data/input/video.mp4
+
+# Check file exists
+ls -lh data/input/video.mp4
+
+# Nếu không thấy, navigate đúng directory
+pwd  # Xem current directory
+cd /mnt/f/path/to/code
+```
+
+---
+
+#### Lỗi: opencv-python build failed
+
+**Triệu chứng:**
+```
+ERROR: Failed building wheel for opencv-python
+```
+
+**Giải pháp:**
+```bash
+# Cài build dependencies
+sudo apt install -y build-essential cmake pkg-config
+sudo apt install -y libgtk-3-dev libavcodec-dev libavformat-dev libswscale-dev
+
+# Hoặc dùng pre-built wheel
+pip3 install opencv-python --only-binary :all:
+
+# Hoặc dùng headless version (nhẹ hơn)
+pip3 install opencv-python-headless
+```
+
+---
+
 ### Linux
 
 #### Camera Device
