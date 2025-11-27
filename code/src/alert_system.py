@@ -199,17 +199,17 @@ class AlertSystem:
         # Add text to banner
         banner_text = "!!! INTRUSION DETECTED !!!"
         (banner_text_width, banner_text_height), _ = cv2.getTextSize(
-            banner_text, cv2.FONT_HERSHEY_BOLD, 1.2, 3
+            banner_text, cv2.FONT_HERSHEY_DUPLEX, 1.2, 3
         )
         text_x = (width - banner_text_width) // 2
         text_y = (banner_height + banner_text_height) // 2
 
         # Add text shadow
         cv2.putText(result, banner_text, (text_x + 2, text_y + 2),
-                   cv2.FONT_HERSHEY_BOLD, 1.2, (0, 0, 0), 5)
+                   cv2.FONT_HERSHEY_DUPLEX, 1.2, (0, 0, 0), 5)
         # Add text
         cv2.putText(result, banner_text, (text_x, text_y),
-                   cv2.FONT_HERSHEY_BOLD, 1.2, (255, 255, 255), 3)
+                   cv2.FONT_HERSHEY_DUPLEX, 1.2, (255, 255, 255), 3)
 
         return result
 
