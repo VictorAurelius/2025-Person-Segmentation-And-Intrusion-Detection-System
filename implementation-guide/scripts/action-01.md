@@ -270,3 +270,7 @@ explorer.exe data/output
 **Kết quả:** 🎉 THÀNH CÔNG HOÀN TOÀN 🎉
 
 hãy sửa lại code, tôi muốn khi trả ra output (video, log, ...) sẽ lưu vào 1 thư mục riêng dựa trên tên video, ví dụ output/input-01 để tránh nhầm output với các input khác
+
+hãy đọc readme để hiểu context của repo
+
+tôi muốn khi trả ra output (video, log, ...) sẽ lưu vào 1 thư mục riêng dựa trên tên video, ví dụ output/input-01 để tránh nhầm output với các input khác => done, nhưng nó vẫn tạo ra folder screenshots và file alerts.log rỗng, mỗi khi chạy => hãy sửa lỗi này
