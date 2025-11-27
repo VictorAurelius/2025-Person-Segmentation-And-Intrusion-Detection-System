@@ -8,3 +8,5 @@ sau đó hãy thực hiện fix bug và ghi lại báo cáo đơn giản vào ru
 tôi ko dùng trong venv mà dùng trong wsl được không?
 
 tôi chỉ hỏi có được hay không thôi, hãy giúp tôi cập nhật hết tài liệu của repo: thêm option wsl
+
+dùng venv trong wsl thì cần gì wsl nữa, dùng ở ngoài luôn?

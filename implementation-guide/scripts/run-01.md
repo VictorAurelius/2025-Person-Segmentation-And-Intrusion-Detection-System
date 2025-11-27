@@ -188,12 +188,23 @@ cd ~/project/code
 #### Bước 5: Cài dependencies trong WSL
 
 ```bash
-# Cài tất cả dependencies
-pip3 install -r requirements.txt
-
-# Nếu gặp lỗi permission, dùng --user
+# Cài với --user flag
 pip3 install --user -r requirements.txt
 ```
+
+**⚠️ Nếu gặp lỗi `externally-managed-environment`:**
+
+Đây là lỗi phổ biến với Python 3.11+ trên Ubuntu:
+
+```bash
+# Fix: Remove restriction file (1 lần duy nhất)
+sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+
+# Sau đó cài lại
+pip3 install --user -r requirements.txt
+```
+
+**Giải thích:** Python 3.11+ block pip install để bảo vệ system. Việc remove file này là an toàn với `--user` flag vì packages được cài vào user space (~/.local/), không ảnh hưởng system.
 
 #### Bước 6: Verify installation
 
@@ -296,6 +307,15 @@ INFO:root:Processing started...
 - Cần GUI display thường xuyên và không muốn setup X server
 
 ### Troubleshooting WSL
+
+**Lỗi: externally-managed-environment**
+```bash
+# Remove restriction (1 lần)
+sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+
+# Cài lại
+pip3 install --user -r requirements.txt
+```
 
 **Lỗi: pip3 not found**
 ```bash

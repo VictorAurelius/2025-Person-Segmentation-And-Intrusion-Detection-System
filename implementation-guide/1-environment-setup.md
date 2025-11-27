@@ -190,15 +190,23 @@ cd ~/project/code
 ### Cài Dependencies trong WSL
 
 ```bash
-# Option 1: Install với pip3 (recommended)
-pip3 install -r requirements.txt
-
-# Option 2: Install với --user flag (nếu không có sudo)
+# Cài với --user flag (recommended)
 pip3 install --user -r requirements.txt
-
-# Option 3: Với sudo (không khuyến nghị)
-sudo pip3 install -r requirements.txt
 ```
+
+**⚠️ Nếu gặp lỗi `externally-managed-environment`:**
+
+Python 3.11+ trên Ubuntu/Debian block pip install để bảo vệ system. Giải pháp:
+
+```bash
+# Remove restriction file (cần sudo 1 lần)
+sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+
+# Sau đó cài bình thường
+pip3 install --user -r requirements.txt
+```
+
+**Lưu ý:** Đây là cách đúng để dùng WSL. Nếu phải dùng venv trong WSL thì mất hết ý nghĩa của WSL rồi!
 
 ### Verify Installation
 

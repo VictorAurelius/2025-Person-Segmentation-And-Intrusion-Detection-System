@@ -528,6 +528,46 @@ path = "data\\input\\video.mp4"
 
 ### WSL (Windows Subsystem for Linux)
 
+#### Lỗi: externally-managed-environment (Python 3.11+)
+
+**Triệu chứng:**
+```bash
+pip3 install --user -r requirements.txt
+error: externally-managed-environment
+
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz...
+```
+
+**Nguyên nhân:**
+- Python 3.11+ trên Ubuntu 22.04+ có PEP 668 protection
+- Block pip install để bảo vệ system packages
+
+**Giải pháp (Recommended):**
+```bash
+# Remove restriction file
+sudo rm /usr/lib/python3.*/EXTERNALLY-MANAGED
+
+# Cài dependencies
+pip3 install --user -r requirements.txt
+
+# Verify
+python3 -c "import cv2; print('OK')"
+```
+
+**Giải pháp Alternative (Force, không khuyến nghị):**
+```bash
+pip3 install --user -r requirements.txt --break-system-packages
+```
+
+**❌ KHÔNG dùng venv trong WSL:**
+- Nếu phải dùng venv thì mất hết ý nghĩa của WSL
+- WSL được thiết kế để dùng trực tiếp, không cần venv
+- Dùng Windows + venv nếu muốn isolation
+
+---
+
 #### Lỗi: pip3 not found
 
 **Triệu chứng:**
