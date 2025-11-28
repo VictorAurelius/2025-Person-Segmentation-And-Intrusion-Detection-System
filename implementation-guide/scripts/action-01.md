@@ -314,3 +314,82 @@ Lưu ý về hình thức báo cáo:
 2. trả ra dạng md, nhưng không đánh ký hiệu, dạng có thể copy vào word tốt nhất có thể
 3. output có ảnh, hãy ghi rõ các nơi trình bày ảnh và log
 4. đây là plan task cho claude, chưa thực hiện ngay
+
+Hãy sửa lại implementaion-guide/scripts/req-1.md để tránh lỗi:
+  ⎿  API Error: Claude's response exceeded the 32000 output token maximum. To configure this behavior, set the CLAUDE_CODE_MAX_OUTPUT_TOKENS environment variable.
+
+bằng cách break nhỏ context hoặc ghi file báo cáo thành từng phần md trước, thay vì tổng hợp hết kiến thức sau đó trả chỉ 1 file
+
+  Những gì đã thay đổi:
+
+  1. File req-1.md (đã sửa)
+
+  - Chuyển từ script tạo toàn bộ báo cáo thành hướng dẫn tổng quan
+  - Giải thích cách chia nhỏ báo cáo thành các phần riêng biệt
+  - Hướng dẫn cách sử dụng các script con
+
+  2. Các script con đã tạo:
+
+  req-1-chapter1.md (implementation-guide/scripts/req-1-chapter1.md:1)
+  - Tạo Chương 1: Cơ Sở Lý Thuyết (~12-15 trang)
+  - 7 mục chính về các kỹ thuật xử lý ảnh
+
+  req-1-chapter2.md (implementation-guide/scripts/req-1-chapter2.md:1)
+  - Tạo Chương 2: Cơ Sở Thực Hành (~15-20 trang)
+  - 7 mục chính về implementation, kết quả thực nghiệm
+
+  req-1-chapter3.md (implementation-guide/scripts/req-1-chapter3.md:1)
+  - Tạo Chương 3: Kết Luận (~8-10 trang)
+  - 5 mục chính về đánh giá, đề xuất, ứng dụng
+
+  req-1-intro.md (implementation-guide/scripts/req-1-intro.md:1)
+  - Tạo phần mở đầu (~5-7 trang)
+  - Trang bìa, lời cảm ơn, tóm tắt, mục lục
+
+  req-1-references.md (implementation-guide/scripts/req-1-references.md:1)
+  - Tạo tài liệu tham khảo (~2-3 trang)
+  - Danh sách sách, papers, documentation, datasets
+
+  Cách sử dụng:
+
+  Tạo từng phần riêng lẻ:
+
+  # Tạo Chương 1
+  "Thực hiện script req-1-chapter1.md để tạo Chương 1"
+
+  # Tạo Chương 2 (cần chạy hệ thống trước để có kết quả)
+  cd code && python src/main.py --source data/input/input-01.mp4
+  "Thực hiện script req-1-chapter2.md để tạo Chương 2"
+
+  # Tạo Chương 3
+  "Thực hiện script req-1-chapter3.md để tạo Chương 3"
+
+  # Tạo phần mở đầu
+  "Thực hiện script req-1-intro.md"
+
+  # Tạo tài liệu tham khảo
+  "Thực hiện script req-1-references.md"
+
+  Output files:
+
+  documentation/report/
+  ├── 00-introduction.md      # Phần mở đầu
+  ├── 01-chapter1-theory.md   # Chương 1
+  ├── 02-chapter2-practice.md # Chương 2
+  ├── 03-chapter3-conclusion.md # Chương 3
+  └── 04-references.md        # Tài liệu tham khảo
+
+  Kết hợp các phần (tùy chọn):
+
+  cd documentation/report
+  cat 00-introduction.md 01-chapter1-theory.md 02-chapter2-practice.md 03-chapter3-conclusion.md 04-references.md >
+  full-report.md
+
+  Lợi ích:
+
+  1. Tránh lỗi token limit: Mỗi script tạo 1 phần nhỏ (~8-20 trang)
+  2. Dễ kiểm soát: Có thể review và sửa từng phần riêng
+  3. Linh hoạt: Có thể chạy lại từng phần nếu cần
+  4. Modular: Dễ dàng cập nhật hoặc thay đổi từng chương
+
+  Bạn có thể bắt đầu với script nào đầu tiên nhé!
