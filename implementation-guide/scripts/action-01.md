@@ -393,3 +393,13 @@ bằng cách break nhỏ context hoặc ghi file báo cáo thành từng phần 
   4. Modular: Dễ dàng cập nhật hoặc thay đổi từng chương
 
   Bạn có thể bắt đầu với script nào đầu tiên nhé!
+
+hãy đọc readme để hiểu repo
+hãy đọc implementaion-guide/2-data-preparation.md để hiểu yêu cầu dữ liệu input
+Vấn đề: tôi không tìm được video thiếu sáng và ban đêm
+
+hãy tạo tool trong code/tools để tạo input dạng thiếu sáng và ban đêm:
+1. tool này tạo ra video có đặc trưng chuẩn của thiếu sáng và ban đêm
+2. video tạo ra phải vừa có đặc trưng vừa vẫn đủ để có hệ thống có khả năng nhận diện
+3. mục tiêu trước hết là input-01
+4. hãy tạo đủ các file yaml sample cho 3 loại điều kiện sáng nữa, để chạy hệ thống cho tốt
